@@ -8,6 +8,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// RecoverMiddleware is the middleware that recovers from panics and logs the error
+// It returns a middleware function that can be used to register the middleware
+// It uses the provided logger to log the error
 var RecoverMiddleware = func(log *logrus.Logger) echo.MiddlewareFunc {
 	return middleware.RecoverWithConfig(
 		middleware.RecoverConfig{

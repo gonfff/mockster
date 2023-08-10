@@ -1,8 +1,6 @@
 package main
 
-import (
-	"github.com/gonfff/mockster/app"
-)
+import "github.com/gonfff/mockster/app"
 
 func main() {
 	// run main application

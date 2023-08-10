@@ -6,8 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// type PingResponse struct {
-
+// Ping is the handler to check if the application is running and healthy
 func Ping(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"message": "pong"})
 }
