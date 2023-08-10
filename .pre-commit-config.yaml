@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: golangci-lint
+        name: golangci-lint
+        language: golang
+        entry: golangci-lint
+        args: ["run", "--config", ".golangci.yml"]
+        types: [go]

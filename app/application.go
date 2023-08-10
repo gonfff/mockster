@@ -1,8 +1,11 @@
-// main application file
+/*
+Package app is the main application package.
+*/
 package app
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/gonfff/mockster/app/api/handlers"
@@ -45,7 +48,7 @@ func registerMiddlewares(app *echo.Echo) {
 // RunApp runs the main application
 func RunApp() {
 	app := echo.New()
-	cfg := NewConfig()
+	cfg := newConfig()
 
 	app.HideBanner = cfg.DisableGreetings
 	app.HidePort = cfg.DisableGreetings
@@ -56,5 +59,9 @@ func RunApp() {
 
 	logger.Info("Application started")
 	logger.Info("Listening on port 8080")
-	app.Start(fmt.Sprintf(":%v", cfg.Port))
+
+	err := app.Start(fmt.Sprintf(":%v", cfg.Port))
+	if err != nil && err != http.ErrServerClosed {
+		logger.WithError(err).Fatal("Application failed")
+	}
 }

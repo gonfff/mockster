@@ -64,7 +64,7 @@ func (c *Config) validateLogLevel() error {
 // NewConfig creates a new Config instance and fills it with the environment variables
 // It also validates the environment variables
 // If any validation fails, the application will exit
-func NewConfig() *Config {
+func newConfig() *Config {
 	cfg := &Config{}
 	if err := env.Parse(cfg); err != nil {
 		log.Fatal(err)
