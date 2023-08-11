@@ -10,6 +10,7 @@ import (
 
 	"github.com/gonfff/mockster/app/api/handlers"
 	"github.com/gonfff/mockster/app/api/middlewares"
+	"github.com/gonfff/mockster/app/parsers"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -48,20 +49,33 @@ func registerMiddlewares(app *echo.Echo) {
 // RunApp runs the main application
 func RunApp() {
 	app := echo.New()
-	cfg := newConfig()
+	cfg, err := newConfig()
+
+	initLogger(cfg)
+
+	if err != nil {
+		logger.WithError(err).Fatal("Failed while reading configuration")
+	}
+
+	mocks, err := parsers.ParseYAML(cfg.MockFilePath)
+	if err != nil {
+		logger.WithError(err).Error("Failed to parse mocks")
+	}
+	// todo remove this
+	fmt.Println(mocks)
 
 	app.HideBanner = cfg.DisableGreetings
 	app.HidePort = cfg.DisableGreetings
 
-	initLogger(cfg)
 	registerRoutes(app)
 	registerMiddlewares(app)
 
 	logger.Info("Application started")
 	logger.Info("Listening on port 8080")
 
-	err := app.Start(fmt.Sprintf(":%v", cfg.Port))
+	err = app.Start(fmt.Sprintf(":%v", cfg.Port))
 	if err != nil && err != http.ErrServerClosed {
 		logger.WithError(err).Fatal("Application failed")
 	}
+
 }

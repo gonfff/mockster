@@ -4,6 +4,7 @@ run:
     format: tab
   skip-dirs:
     - vendor
+    - examples
 
 linters-settings:
   govet:

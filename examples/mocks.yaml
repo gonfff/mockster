@@ -1,0 +1,105 @@
+mocks:
+  - path: /sipmle/get/request
+    method: GET
+    response:
+      status: 200
+      headers:
+        Content-Type: application/json
+      body: '{"message": "JSON response"}'
+
+  - path: /sipmle/post/error
+    method: POST
+    request:
+      body: '{"name": "John", "age": 30}'
+    response:
+      status: 400
+      headers:
+        Content-Type: application/json
+      body: | 
+        {
+          "detail": [
+          {
+            "loc": [
+            "body",
+              0
+            ],
+            "msg": "Field city is required"
+            }
+          ]
+        }
+
+  - path: /users
+    method: POST
+    request:
+      headers:
+        - Content-Type: application/json
+      body: '{"name": "John", "age": 30}'
+      query_params:
+        - key: key1
+          value: value1
+    response:
+      status: 200
+      headers:
+        Content-Type: application/json
+      body: '{"message": "JSON response"}'
+
+  - path: /users
+    method: POST
+    request:
+      headers:
+        - Content-Type: application/x-www-form-urlencoded
+      body: name=Jane&age=25
+      query_params:
+        - key: key2
+          value: value2
+    response:
+      status: 200
+      headers:
+        Content-Type: text/plain
+      body: 'Form data received'
+
+  - path: /api/xml
+    method: POST
+    request:
+      headers:
+        - Content-Type: application/xml
+      body: '<user><name>Smith</name><age>40</age></user>'
+      query_params:
+        - key: key3
+          value: value3
+    response:
+      status: 200
+      headers:
+        Content-Type: application/xml
+      body: '<response>XML response</response>'
+
+  - path: /api/plain-text
+    method: GET
+    request:
+      cookies:
+        - name: sessionID
+          value: abcd1234
+      query_params:
+        - key: key4
+          value: value4
+    response:
+      status: 200
+      headers:
+        Content-Type: text/plain
+      body: 'Plain text response'
+
+  - path: /api/error
+    method: GET
+    response:
+      status: 500
+      headers:
+        Content-Type: text/plain
+      body: 'Internal Server Error'
+
+  - path: /api/not-found
+    method: GET
+    response:
+      status: 404
+      headers:
+        Content-Type: text/plain
+      body: 'Not Found'

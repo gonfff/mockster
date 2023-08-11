@@ -2,7 +2,6 @@ package app
 
 import (
 	"errors"
-	"log"
 
 	"github.com/caarlos0/env/v9"
 	"github.com/sirupsen/logrus"
@@ -12,7 +11,7 @@ import (
 type Config struct {
 	Environment      string `env:"ENVIRONMENT,notEmpty"`
 	DisableGreetings bool   `env:"DISABLE_GREETINGS" envDefault:"true"`
-	InitFilePath     string `env:"INIT_FILE_PATH"`
+	MockFilePath     string `env:"MOCK_FILE_PATH"`
 	LogFormatter     string `env:"LOG_FORMATTER" envDefault:"text"`
 	LogLevel         string `env:"LOG_LEVEL" envDefault:"info"`
 	RecreateDB       bool   `env:"RECREATE_DB"`
@@ -64,21 +63,20 @@ func (c *Config) validateLogLevel() error {
 // NewConfig creates a new Config instance and fills it with the environment variables
 // It also validates the environment variables
 // If any validation fails, the application will exit
-func newConfig() *Config {
+func newConfig() (*Config, error) {
 	cfg := &Config{}
 	if err := env.Parse(cfg); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-
 	if err := cfg.validateEnvironment(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	if err := cfg.validateLogFormatter(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	if err := cfg.validateLogLevel(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return cfg
+	return cfg, nil
 }

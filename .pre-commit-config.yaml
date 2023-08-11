@@ -4,6 +4,5 @@ repos:
       - id: golangci-lint
         name: golangci-lint
         language: golang
-        entry: golangci-lint
-        args: ["run", "--config", ".golangci.yml"]
+        entry: golangci-lint run --config .golangci.yml --skip-dirs vendor
         types: [go]
