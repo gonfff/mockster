@@ -2,7 +2,9 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/gonfff/mockster/app/models"
@@ -15,6 +17,9 @@ func NewInMemoryRepository(log *logrus.Logger) *InMemoryRepository {
 	if r.storage == nil {
 		r.storage = make(map[string]*models.Mock)
 	}
+	if r.pathIndex == nil {
+		r.pathIndex = make(map[string]string)
+	}
 	return r
 
 }
@@ -24,7 +29,23 @@ type InMemoryRepository struct {
 	log     *logrus.Logger
 	mu      sync.RWMutex
 	storage map[string]*models.Mock
-	order   []string
+
+	order     []string
+	pathIndex map[string]string
+}
+
+// GetNameByPathMethod returns the name of the mock with the given path and method
+func (r *InMemoryRepository) GetNameByPathMethod(method, path, body string) (string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	// complex composite key for greater uniqueness on partial matches
+	key := fmt.Sprintf("%v %v %v", method, path, strings.ReplaceAll(body, "\n", ""))
+	name, ok := r.pathIndex[key]
+	if !ok {
+		return "", errors.New("mock with this path and method does not exist")
+	}
+	return name, nil
 }
 
 // GetMock returns the mock with the given name
@@ -34,7 +55,7 @@ func (r *InMemoryRepository) GetMock(name string) (*models.Mock, error) {
 
 	mock, ok := r.storage[name]
 	if !ok {
-		return nil, nil
+		return nil, errors.New("mock with this name does not exist")
 	}
 	return mock, nil
 }
@@ -61,6 +82,8 @@ func (r *InMemoryRepository) AddMock(mock *models.Mock) error {
 	}
 
 	r.storage[mock.Name] = mock
+	key := fmt.Sprintf("%v %v %v", mock.Method, mock.Path, mock.Request.Body)
+	r.pathIndex[key] = mock.Name
 	r.order = append(r.order, mock.Name)
 	sort.Strings(r.order)
 
@@ -77,6 +100,8 @@ func (r *InMemoryRepository) UpdateMock(mock *models.Mock) error {
 	}
 
 	r.storage[mock.Name] = mock
+	key := fmt.Sprintf("%v %v %v", mock.Method, mock.Path, mock.Response.Body)
+	r.pathIndex[key] = mock.Name
 	return nil
 }
 
@@ -97,11 +122,14 @@ func (r *InMemoryRepository) ChangeName(oldName, newName string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, ok := r.storage[oldName]; !ok {
+	mock, ok := r.storage[oldName]
+	if !ok {
 		return errors.New("mock with this name does not exist")
 	}
 
 	r.storage[newName] = r.storage[oldName]
+	key := fmt.Sprintf("%v %v %v", mock.Method, mock.Path, mock.Response.Body)
+	r.pathIndex[key] = newName
 	delete(r.storage, oldName)
 	return nil
 }

@@ -5,7 +5,7 @@
 - [X] Create yaml parsers and validators
 - [X] Choose a DB to store data (thats should be file or in memory database, document or kv store) `I choose to try to use in memory hash map, write some interfaces and then try to use boltdb or rocksdb`
 - [X] Write interfaces and repos for storage `In memory hash map is ready`
-- [ ] Write mock-serving logic
+- [X] Write mock-serving logic `But with constrains. Str combination of method+path+body is used as key for searching mock. So if you have two mocks with same method, path and body, you will get only first mock. `
 - [ ] Write handlers for getting yaml files with http(with append and replace options)
 - [ ] Write handlers for management mocks by rest api
 - [ ] Write handlers for import and export data with yaml files

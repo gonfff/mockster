@@ -8,6 +8,7 @@ import (
 
 // MockRepository is the interface for the mock repository
 type MockRepository interface {
+	GetNameByPathMethod(method string, path string, body string) (string, error)
 	GetMock(name string) (*models.Mock, error)
 	GetMocks() ([]*models.Mock, error)
 	AddMock(mock *models.Mock) error

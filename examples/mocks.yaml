@@ -3,13 +3,12 @@ mocks:
     path: /ping
     method: GET
     request:
-      headers:
-        Content-Type: application/json
     response:
       status: 200
 
+
   - name: simple-get-request
-    path: /sipmle/get/request
+    path: /simple/get/request
     method: GET
     response:
       status: 200
@@ -18,7 +17,7 @@ mocks:
       body: '{"message": "JSON response"}'
 
   - name: simple-post-request
-    path: /sipmle/post/error
+    path: /simple/post/error
     method: POST
     request:
       body: '{"name": "John", "age": 30}'
@@ -98,7 +97,7 @@ mocks:
       body: 'Plain text response'
   
   - name: get-not-found
-    path: /api/error
+    path: /api/not-found
     method: GET
     response:
       status: 404

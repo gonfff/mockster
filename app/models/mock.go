@@ -38,7 +38,7 @@ type Mocks struct {
 }
 
 var validPathRegex = regexp.MustCompile(`^/.*$`)
-var forbiddenCharsRegex = regexp.MustCompile(`[<>{}|\^\[\]"]`)
+var forbiddenCharsRegex = regexp.MustCompile(`[<>{}|\^\[\]"]?&`)
 
 func validHTTPPath(fl validator.FieldLevel) bool {
 	path := fl.Field().String()

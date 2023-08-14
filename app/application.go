@@ -35,12 +35,6 @@ func initLogger(cfg *configs.AppConfig) {
 	logger.SetLevel(cfg.IntLogLevel)
 }
 
-// registerRoutes registers the application routes
-func registerRoutes(app *echo.Echo) {
-	app.GET("/ping", handlers.Ping)
-
-}
-
 // registerMiddlewares registers the application middlewares
 func registerMiddlewares(app *echo.Echo) {
 	app.Use(middlewares.AccessLogMiddleware(logger))
@@ -85,15 +79,14 @@ func RunApp() {
 	app.HideBanner = cfg.DisableGreetings
 	app.HidePort = cfg.DisableGreetings
 
-	registerRoutes(app)
+	handlers.NewPingHandler().RegisterRoutes(app)
+	handlers.NewMockHandler(repo).RegisterRoutes(app)
 	registerMiddlewares(app)
 
 	logger.Info("Application started")
 	logger.Info("Listening on port 8080")
-
 	err = app.Start(fmt.Sprintf(":%v", cfg.Port))
 	if err != nil && err != http.ErrServerClosed {
 		logger.WithError(err).Fatal("Application failed")
 	}
-
 }
