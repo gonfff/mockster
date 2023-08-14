@@ -10,7 +10,7 @@ import (
 )
 
 // ParseYAML reads a YAML file and returns a Mocks struct
-func ParseYAML(filePath string) (*models.Mocks, error) {
+func ParseYAML(filePath string) ([]models.Mock, error) {
 	fileContent, err := os.ReadFile(filepath.Clean(filePath))
 	if err != nil {
 		return nil, fmt.Errorf("error reading file: %w", err)
@@ -25,5 +25,6 @@ func ParseYAML(filePath string) (*models.Mocks, error) {
 	if err = mocks.Validate(); err != nil {
 		return nil, fmt.Errorf("error validating YAML: %w", err)
 	}
-	return mocks, nil
+
+	return mocks.Mocks, nil
 }

@@ -1,5 +1,15 @@
 mocks:
-  - path: /sipmle/get/request
+  - name: ping
+    path: /ping
+    method: GET
+    request:
+      headers:
+        Content-Type: application/json
+    response:
+      status: 200
+
+  - name: simple-get-request
+    path: /sipmle/get/request
     method: GET
     response:
       status: 200
@@ -7,7 +17,8 @@ mocks:
         Content-Type: application/json
       body: '{"message": "JSON response"}'
 
-  - path: /sipmle/post/error
+  - name: simple-post-request
+    path: /sipmle/post/error
     method: POST
     request:
       body: '{"name": "John", "age": 30}'
@@ -28,67 +39,75 @@ mocks:
           ]
         }
 
-  - path: /users
+  - name: add-users-ok
+    path: /users
     method: POST
     request:
       headers:
-        - Content-Type: application/json
+        Content-Type: application/json
       body: '{"name": "John", "age": 30}'
       query_params:
-        - key: key1
-          value: value1
+        qwe: ewq
     response:
       status: 200
       headers:
         Content-Type: application/json
       body: '{"message": "JSON response"}'
 
-  - path: /users
+  - name: another-add-users-ok
+    path: /users
     method: POST
     request:
       headers:
-        - Content-Type: application/x-www-form-urlencoded
+        Content-Type: application/x-www-form-urlencoded
       body: name=Jane&age=25
       query_params:
-        - key: key2
-          value: value2
+        qwe: ewq
     response:
       status: 200
       headers:
         Content-Type: text/plain
       body: 'Form data received'
 
-  - path: /api/xml
+  - name: post-xml
+    path: /api/xml
     method: POST
     request:
       headers:
-        - Content-Type: application/xml
+        Content-Type: application/xml
       body: '<user><name>Smith</name><age>40</age></user>'
       query_params:
-        - key: key3
-          value: value3
+        qwe: ewq
+        asd: dsa
     response:
       status: 200
       headers:
         Content-Type: application/xml
       body: '<response>XML response</response>'
 
-  - path: /api/plain-text
+  - name: get-plain-text
+    path: /api/plain-text
     method: GET
     request:
       cookies:
-        - name: sessionID
-          value: abcd1234
-      query_params:
-        - key: key4
-          value: value4
+        sessionID: abcd1234
     response:
       status: 200
       headers:
         Content-Type: text/plain
       body: 'Plain text response'
+  
+  - name: get-not-found
+    path: /api/error
+    method: GET
+    response:
+      status: 404
+      headers:
+        Content-Type: text/plain
+      body: 'Not Found'
 
-  - path: /api/error
+  - name: get-error
+    path: /api/error
     method: GET
     response:
       status: 500
@@ -96,10 +115,3 @@ mocks:
         Content-Type: text/plain
       body: 'Internal Server Error'
 
-  - path: /api/not-found
-    method: GET
-    response:
-      status: 404
-      headers:
-        Content-Type: text/plain
-      body: 'Not Found'

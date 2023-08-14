@@ -9,10 +9,11 @@ import (
 
 // Mock is a struct for building endpoints for mocking
 type Mock struct {
+	Name     string   `yaml:"name" validate:"required"`
 	Path     string   `yaml:"path" validate:"required,validHTTPPath"`
 	Method   string   `yaml:"method" validate:"required,oneof=GET POST PUT PATCH DELETE OPTIONS HEAD"`
 	Request  Request  `yaml:"request" validate:"dive"`
-	Response Response `yaml:"response" validate:"dive"`
+	Response Response `yaml:"response" validate:"required,dive"`
 }
 
 // Request is the request for getting Response
@@ -60,7 +61,7 @@ func (m *Mocks) Validate() error {
 	validate := validator.New()
 	_ = validate.RegisterValidation("validHTTPPath", validHTTPPath)
 
-	err := validate.Struct(m.Mocks)
+	err := validate.Struct(m)
 	if err != nil {
 		return fmt.Errorf("error validating Mocks: %w", err)
 	}

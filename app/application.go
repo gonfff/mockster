@@ -10,7 +10,9 @@ import (
 
 	"github.com/gonfff/mockster/app/api/handlers"
 	"github.com/gonfff/mockster/app/api/middlewares"
+	"github.com/gonfff/mockster/app/configs"
 	"github.com/gonfff/mockster/app/parsers"
+	"github.com/gonfff/mockster/app/repository"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -21,7 +23,7 @@ var logger *logrus.Logger
 
 // initLogger initializes the application logger
 // configuration is read from the environment
-func initLogger(cfg *Config) {
+func initLogger(cfg *configs.AppConfig) {
 	logger = logrus.New()
 
 	if cfg.LogFormatter == "json" {
@@ -30,7 +32,7 @@ func initLogger(cfg *Config) {
 		logger.SetFormatter(&logrus.TextFormatter{})
 	}
 	logger.SetOutput(os.Stdout)
-	logger.SetLevel(cfg.logLevel)
+	logger.SetLevel(cfg.IntLogLevel)
 }
 
 // registerRoutes registers the application routes
@@ -46,23 +48,39 @@ func registerMiddlewares(app *echo.Echo) {
 	app.Pre(middleware.RemoveTrailingSlash())
 }
 
+func addInitialMocks(cfg *configs.AppConfig, repo repository.MockRepository) {
+	mocks, err := parsers.ParseYAML(cfg.MockFilePath)
+	if err != nil {
+		logger.WithError(err).Error("Failed to parse mocks")
+		return
+	}
+
+	for _, mock := range mocks {
+		// because address of range variable is reused
+		newMock := mock
+		err = repo.AddMock(&newMock)
+		if err != nil {
+			logger.WithError(err).Error("Failed to add mock")
+		}
+	}
+}
+
 // RunApp runs the main application
 func RunApp() {
 	app := echo.New()
-	cfg, err := newConfig()
 
-	initLogger(cfg)
-
+	cfg, err := configs.NewConfig()
 	if err != nil {
 		logger.WithError(err).Fatal("Failed while reading configuration")
 	}
 
-	mocks, err := parsers.ParseYAML(cfg.MockFilePath)
+	initLogger(cfg)
+
+	repo, err := repository.InitRepository(cfg, logger)
 	if err != nil {
-		logger.WithError(err).Error("Failed to parse mocks")
+		logger.WithError(err).Fatal("Failed to initialize repository")
 	}
-	// todo remove this
-	fmt.Println(mocks)
+	addInitialMocks(cfg, repo)
 
 	app.HideBanner = cfg.DisableGreetings
 	app.HidePort = cfg.DisableGreetings

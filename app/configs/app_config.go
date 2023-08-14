@@ -1,4 +1,4 @@
-package app
+package configs
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Config is the application configuration. It is filled by the environment
-type Config struct {
+// AppConfig is the application configuration. It is filled by the environment
+type AppConfig struct {
 	Environment      string `env:"ENVIRONMENT,notEmpty"`
 	DisableGreetings bool   `env:"DISABLE_GREETINGS" envDefault:"true"`
 	MockFilePath     string `env:"MOCK_FILE_PATH"`
@@ -16,13 +16,14 @@ type Config struct {
 	LogLevel         string `env:"LOG_LEVEL" envDefault:"info"`
 	RecreateDB       bool   `env:"RECREATE_DB"`
 	Port             int    `env:"PORT" envDefault:"8080"`
+	StorageType      string `env:"STORAGE" envDefault:"in_memory"`
 
-	logLevel logrus.Level
+	IntLogLevel logrus.Level
 }
 
 // validateEnvironment validates the ENVIRONMENT variable
 // possible values: local, development, production
-func (c *Config) validateEnvironment() error {
+func (c *AppConfig) validateEnvironment() error {
 	envs := map[string]string{
 		"local":       "",
 		"developnemt": "",
@@ -37,7 +38,7 @@ func (c *Config) validateEnvironment() error {
 
 // validateLogFormatter validates the LOG_FORMATTER variable
 // possible values: text, json
-func (c *Config) validateLogFormatter() error {
+func (c *AppConfig) validateLogFormatter() error {
 	logFormatters := map[string]string{
 		"text": "",
 		"json": "",
@@ -51,20 +52,20 @@ func (c *Config) validateLogFormatter() error {
 
 // validateLogLevel validates the LOG_LEVEL variable
 // possible values: panic, fatal, error, warn, info, debug, trace
-func (c *Config) validateLogLevel() error {
+func (c *AppConfig) validateLogLevel() error {
 	lvl, err := logrus.ParseLevel(c.LogLevel)
 	if err != nil {
 		return err
 	}
-	c.logLevel = lvl
+	c.IntLogLevel = lvl
 	return nil
 }
 
-// NewConfig creates a new Config instance and fills it with the environment variables
+// NewConfig creates a new AppConfig instance and fills it with the environment variables
 // It also validates the environment variables
 // If any validation fails, the application will exit
-func newConfig() (*Config, error) {
-	cfg := &Config{}
+func NewConfig() (*AppConfig, error) {
+	cfg := &AppConfig{}
 	if err := env.Parse(cfg); err != nil {
 		return nil, err
 	}
