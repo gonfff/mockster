@@ -4,25 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"sort"
-	"strings"
 	"sync"
 
 	"github.com/gonfff/mockster/app/models"
 	"github.com/sirupsen/logrus"
 )
-
-// NewInMemoryRepository creates a new InMemoryRepository
-func NewInMemoryRepository(log *logrus.Logger) *InMemoryRepository {
-	r := &InMemoryRepository{log: log}
-	if r.storage == nil {
-		r.storage = make(map[string]*models.Mock)
-	}
-	if r.pathIndex == nil {
-		r.pathIndex = make(map[string]string)
-	}
-	return r
-
-}
 
 // InMemoryRepository is an in-memory implementation of the MockRepository
 type InMemoryRepository struct {
@@ -30,22 +16,21 @@ type InMemoryRepository struct {
 	mu      sync.RWMutex
 	storage map[string]*models.Mock
 
-	order     []string
-	pathIndex map[string]string
+	order         []string
+	endpointMocks map[string][]string
 }
 
-// GetNameByPathMethod returns the name of the mock with the given path and method
-func (r *InMemoryRepository) GetNameByPathMethod(method, path, body string) (string, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	// complex composite key for greater uniqueness on partial matches
-	key := fmt.Sprintf("%v %v %v", method, path, strings.ReplaceAll(body, "\n", ""))
-	name, ok := r.pathIndex[key]
-	if !ok {
-		return "", errors.New("mock with this path and method does not exist")
+// NewInMemoryRepository creates a new InMemoryRepository
+func NewInMemoryRepository(log *logrus.Logger) *InMemoryRepository {
+	r := &InMemoryRepository{log: log}
+	if r.storage == nil {
+		r.storage = make(map[string]*models.Mock)
 	}
-	return name, nil
+	if r.endpointMocks == nil {
+		r.endpointMocks = make(map[string][]string)
+	}
+	return r
+
 }
 
 // GetMock returns the mock with the given name
@@ -82,8 +67,8 @@ func (r *InMemoryRepository) AddMock(mock *models.Mock) error {
 	}
 
 	r.storage[mock.Name] = mock
-	key := fmt.Sprintf("%v %v %v", mock.Method, mock.Path, mock.Request.Body)
-	r.pathIndex[key] = mock.Name
+	key := fmt.Sprintf("%v %v", mock.Method, mock.Path)
+	r.endpointMocks[key] = append(r.endpointMocks[key], mock.Name)
 	r.order = append(r.order, mock.Name)
 	sort.Strings(r.order)
 
@@ -91,18 +76,26 @@ func (r *InMemoryRepository) AddMock(mock *models.Mock) error {
 }
 
 // UpdateMock updates the mock with the given name
-func (r *InMemoryRepository) UpdateMock(mock *models.Mock) error {
+func (r *InMemoryRepository) UpdateMock(newMock *models.Mock) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, ok := r.storage[mock.Name]; !ok {
+	oldMock, ok := r.storage[newMock.Name]
+	if !ok {
 		return errors.New("mock with this name does not exist")
 	}
 
-	r.storage[mock.Name] = mock
-	key := fmt.Sprintf("%v %v %v", mock.Method, mock.Path, mock.Response.Body)
-	r.pathIndex[key] = mock.Name
+	newKey := fmt.Sprintf("%v %v", newMock.Method, newMock.Path)
+	oldKey := fmt.Sprintf("%v %v", oldMock.Method, oldMock.Path)
+
+	if newKey != oldKey {
+		r.deleteFromEndpoints(oldMock)
+		r.endpointMocks[newKey] = append(r.endpointMocks[newKey], newMock.Name)
+	}
+
+	r.storage[newMock.Name] = newMock
 	return nil
+
 }
 
 // DeleteMock deletes the mock with the given name
@@ -110,9 +103,12 @@ func (r *InMemoryRepository) DeleteMock(name string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, ok := r.storage[name]; !ok {
+	mock, ok := r.storage[name]
+	if !ok {
 		return errors.New("mock with this name does not exist")
 	}
+
+	r.deleteFromEndpoints(mock)
 	delete(r.storage, name)
 	return nil
 }
@@ -126,10 +122,35 @@ func (r *InMemoryRepository) ChangeName(oldName, newName string) error {
 	if !ok {
 		return errors.New("mock with this name does not exist")
 	}
+	r.deleteFromEndpoints(mock)
 
-	r.storage[newName] = r.storage[oldName]
-	key := fmt.Sprintf("%v %v %v", mock.Method, mock.Path, mock.Response.Body)
-	r.pathIndex[key] = newName
+	mock.Name = newName
+	endpoint := fmt.Sprintf("%v %v", mock.Method, mock.Path)
+	r.endpointMocks[endpoint] = append(r.endpointMocks[endpoint], newName)
 	delete(r.storage, oldName)
+	r.storage[newName] = mock
 	return nil
+}
+
+// deleteFromEndpoints deletes the mock from the endpointMocks map
+func (r *InMemoryRepository) deleteFromEndpoints(mock *models.Mock) {
+	endpoint := fmt.Sprintf("%v %v", mock.Method, mock.Path)
+	for i, name := range r.endpointMocks[endpoint] {
+		if name == mock.Name {
+			r.endpointMocks[endpoint] = append(r.endpointMocks[endpoint][:i], r.endpointMocks[endpoint][i+1:]...)
+			break
+		}
+	}
+}
+
+// GetMockNames returns all mock names for the given endpoint (method + path)
+func (r *InMemoryRepository) GetMockNames(endpoint string) ([]string, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	mockNames, ok := r.endpointMocks[endpoint]
+	if !ok {
+		return nil, errors.New("endpoint does not exist")
+	}
+	return mockNames, nil
 }

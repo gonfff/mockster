@@ -4,6 +4,8 @@ import "github.com/gonfff/mockster/app"
 
 func main() {
 	// 	// run main application
-	app.RunApp()
+	application := app.NewApp()
+	application.Setup()
+	application.Start()
 
 }

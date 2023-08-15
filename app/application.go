@@ -1,6 +1,3 @@
-/*
-Package app is the main application package.
-*/
 package app
 
 import (
@@ -18,75 +15,98 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// logger is the application logger
-var logger *logrus.Logger
+// App is the main application
+type App struct {
+	e    *echo.Echo
+	cfg  *configs.AppConfig
+	log  *logrus.Logger
+	repo repository.MockRepository
+}
 
-// initLogger initializes the application logger
-// configuration is read from the environment
-func initLogger(cfg *configs.AppConfig) {
-	logger = logrus.New()
+// NewApp creates a new application
+func NewApp() *App {
+	// get configuration
+	cfg, err := configs.NewConfig()
+	if err != nil {
+		log := logrus.New()
+		log.WithError(err).Fatal("Failed while reading configuration")
+	}
+
+	// initialize logger
+	log := newLogger(cfg)
+
+	// initialize repository
+	repo, err := repository.InitRepository(cfg, log)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize repository")
+	}
+
+	e := echo.New()
+	return &App{
+		e:    e,
+		cfg:  cfg,
+		log:  log,
+		repo: repo,
+	}
+}
+
+// newLogger initializes the application logger
+func newLogger(cfg *configs.AppConfig) *logrus.Logger {
+	log := logrus.New()
 
 	if cfg.LogFormatter == "json" {
-		logger.SetFormatter(&logrus.JSONFormatter{})
+		log.SetFormatter(&logrus.JSONFormatter{})
 	} else {
-		logger.SetFormatter(&logrus.TextFormatter{})
+		log.SetFormatter(&logrus.TextFormatter{})
 	}
-	logger.SetOutput(os.Stdout)
-	logger.SetLevel(cfg.IntLogLevel)
+	log.SetOutput(os.Stdout)
+	log.SetLevel(cfg.IntLogLevel)
+	return log
+}
+
+// Setup sets up the application
+func (app *App) Setup() {
+	app.e.HideBanner = app.cfg.DisableGreetings
+	app.e.HidePort = app.cfg.DisableGreetings
+
+	handlers.NewPingHandler(app.e).RegisterRoutes()
+	handlers.NewMockHandler(app.e, app.repo, app.log).RegisterRoutes()
+
+	app.registerMiddlewares()
+	app.loadInitialMocks()
 }
 
 // registerMiddlewares registers the application middlewares
-func registerMiddlewares(app *echo.Echo) {
-	app.Use(middlewares.AccessLogMiddleware(logger))
-	app.Use(middlewares.RecoverMiddleware(logger))
-	app.Pre(middleware.RemoveTrailingSlash())
+func (app *App) registerMiddlewares() {
+	app.e.Use(middlewares.AccessLogMiddleware(app.log))
+	app.e.Use(middlewares.RecoverMiddleware(app.log))
+	app.e.Pre(middleware.RemoveTrailingSlash())
 }
 
-func addInitialMocks(cfg *configs.AppConfig, repo repository.MockRepository) {
-	mocks, err := parsers.ParseYAML(cfg.MockFilePath)
+// loadInitialMocks loads the initial mocks from the mock file
+func (app *App) loadInitialMocks() {
+	mocks, err := parsers.ParseYAML(app.cfg.MockFilePath)
 	if err != nil {
-		logger.WithError(err).Error("Failed to parse mocks")
+		app.log.WithError(err).Error("Failed to parse mocks")
 		return
 	}
 
 	for _, mock := range mocks {
 		// because address of range variable is reused
 		newMock := mock
-		err = repo.AddMock(&newMock)
+		err = app.repo.AddMock(&newMock)
 		if err != nil {
-			logger.WithError(err).Error("Failed to add mock")
+			app.log.WithError(err).Error("Failed to add mock")
 		}
 	}
 }
 
-// RunApp runs the main application
-func RunApp() {
-	app := echo.New()
-
-	cfg, err := configs.NewConfig()
-	if err != nil {
-		logger.WithError(err).Fatal("Failed while reading configuration")
-	}
-
-	initLogger(cfg)
-
-	repo, err := repository.InitRepository(cfg, logger)
-	if err != nil {
-		logger.WithError(err).Fatal("Failed to initialize repository")
-	}
-	addInitialMocks(cfg, repo)
-
-	app.HideBanner = cfg.DisableGreetings
-	app.HidePort = cfg.DisableGreetings
-
-	handlers.NewPingHandler().RegisterRoutes(app)
-	handlers.NewMockHandler(repo).RegisterRoutes(app)
-	registerMiddlewares(app)
-
-	logger.Info("Application started")
-	logger.Info("Listening on port 8080")
-	err = app.Start(fmt.Sprintf(":%v", cfg.Port))
+// Start starts the application
+func (app *App) Start() {
+	app.log.Info("Application started")
+	app.log.Info("Listening on port 8080")
+	err := app.e.Start(fmt.Sprintf(":%v", app.cfg.Port))
 	if err != nil && err != http.ErrServerClosed {
-		logger.WithError(err).Fatal("Application failed")
+		app.log.WithError(err).Fatal("Application failed")
 	}
 }

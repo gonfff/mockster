@@ -7,16 +7,18 @@ import (
 )
 
 // PingHandler is the handler for the /ping route
-type PingHandler struct{}
+type PingHandler struct {
+	e *echo.Echo
+}
 
 // NewPingHandler creates a new PingHandler
-func NewPingHandler() *MockHandler {
-	return &MockHandler{}
+func NewPingHandler(e *echo.Echo) *PingHandler {
+	return &PingHandler{e: e}
 }
 
 // RegisterRoutes registers the routes for the handler
-func (h *PingHandler) RegisterRoutes(e *echo.Echo) {
-	e.GET("/ping", h.Ping)
+func (h *PingHandler) RegisterRoutes() {
+	h.e.GET("/ping", h.Ping)
 }
 
 // Ping is the handler to check if the application is running and healthy
