@@ -9,22 +9,26 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// ParseYAML reads a YAML file and returns a Mocks struct
-func ParseYAML(filePath string) ([]models.Mock, error) {
-	fileContent, err := os.ReadFile(filepath.Clean(filePath))
-	if err != nil {
-		return nil, fmt.Errorf("error reading file: %w", err)
-	}
-
+// ParseYAML parses YAML content and returns Mocks struct
+func ParseYAML(content []byte) ([]models.Mock, error) {
 	mocks := &models.Mocks{}
 
-	if err = yaml.Unmarshal(fileContent, mocks); err != nil {
+	if err := yaml.Unmarshal(content, mocks); err != nil {
 		return nil, fmt.Errorf("error unmarshaling YAML: %w", err)
 	}
 
-	if err = mocks.Validate(); err != nil {
+	if err := mocks.Validate(); err != nil {
 		return nil, fmt.Errorf("error validating YAML: %w", err)
 	}
 
 	return mocks.Mocks, nil
+}
+
+// FileYAML parses YAML file from filesystem and returns mocks
+func FileYAML(filePath string) ([]models.Mock, error) {
+	content, err := os.ReadFile(filepath.Clean(filePath))
+	if err != nil {
+		return nil, fmt.Errorf("error reading file: %w", err)
+	}
+	return ParseYAML(content)
 }

@@ -74,17 +74,17 @@ func (h *MockHandler) any(c echo.Context) error {
 
 	// check if mock exists
 	if err != nil {
-		return c.JSON(404, JSONMessageError(err))
+		return c.JSON(http.StatusNotFound, MessageNotFound)
 	}
 	if len(mockNames) == 0 {
-		return c.JSON(500, JSONMessageText("No mocks found for this endpoint"))
+		return c.JSON(http.StatusInternalServerError, Message{Message: "No mocks found for this endpoint"})
 	}
 
 	// validate
 	for i, mockName := range mockNames {
 		mock, err := h.repo.GetMock(mockName)
 		if err != nil && i == len(mockNames)-1 {
-			return c.JSON(400, JSONMessageError(err))
+			return c.JSON(http.StatusBadRequest, Message{Message: err.Error()})
 		} else if err != nil {
 			continue
 		}
@@ -92,7 +92,7 @@ func (h *MockHandler) any(c echo.Context) error {
 		err = h.validateQuery(c, mock)
 
 		if err != nil && i == len(mockNames)-1 {
-			return c.JSON(400, JSONMessageError(err))
+			return c.JSON(http.StatusBadRequest, Message{Message: err.Error()})
 		} else if err != nil {
 			continue
 		}
@@ -110,5 +110,5 @@ func (h *MockHandler) any(c echo.Context) error {
 		}
 		return c.String(mock.Response.Status, mock.Response.Body)
 	}
-	return c.JSON(500, JSONMessageText("Somthing went wrong"))
+	return c.JSON(http.StatusInternalServerError, Message{Message: "Somthing went wrong"})
 }

@@ -71,6 +71,7 @@ func (app *App) Setup() {
 
 	handlers.NewPingHandler(app.e).RegisterRoutes()
 	handlers.NewMockHandler(app.e, app.repo, app.log).RegisterRoutes()
+	handlers.NewUploadHandler(app.e, app.repo).RegisterRoutes()
 
 	app.registerMiddlewares()
 	app.loadInitialMocks()
@@ -85,7 +86,7 @@ func (app *App) registerMiddlewares() {
 
 // loadInitialMocks loads the initial mocks from the mock file
 func (app *App) loadInitialMocks() {
-	mocks, err := parsers.ParseYAML(app.cfg.MockFilePath)
+	mocks, err := parsers.FileYAML(app.cfg.MockFilePath)
 	if err != nil {
 		app.log.WithError(err).Error("Failed to parse mocks")
 		return

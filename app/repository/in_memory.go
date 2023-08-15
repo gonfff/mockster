@@ -63,7 +63,7 @@ func (r *InMemoryRepository) AddMock(mock *models.Mock) error {
 	defer r.mu.Unlock()
 
 	if _, ok := r.storage[mock.Name]; ok {
-		return errors.New("mock with this name already exists")
+		return fmt.Errorf("mock with name \"%s\" already exists", mock.Name)
 	}
 
 	r.storage[mock.Name] = mock
@@ -82,7 +82,7 @@ func (r *InMemoryRepository) UpdateMock(newMock *models.Mock) error {
 
 	oldMock, ok := r.storage[newMock.Name]
 	if !ok {
-		return errors.New("mock with this name does not exist")
+		return fmt.Errorf("mock with name \"%s\" does not exist", newMock.Name)
 	}
 
 	newKey := fmt.Sprintf("%v %v", newMock.Method, newMock.Path)
@@ -105,7 +105,7 @@ func (r *InMemoryRepository) DeleteMock(name string) error {
 
 	mock, ok := r.storage[name]
 	if !ok {
-		return errors.New("mock with this name does not exist")
+		return fmt.Errorf("mock with name \"%s\" does not exist", name)
 	}
 
 	r.deleteFromEndpoints(mock)
@@ -120,7 +120,8 @@ func (r *InMemoryRepository) ChangeName(oldName, newName string) error {
 
 	mock, ok := r.storage[oldName]
 	if !ok {
-		return errors.New("mock with this name does not exist")
+		return fmt.Errorf("mock with name \"%s\" does not exist", oldName)
+
 	}
 	r.deleteFromEndpoints(mock)
 
@@ -153,4 +154,15 @@ func (r *InMemoryRepository) GetMockNames(endpoint string) ([]string, error) {
 		return nil, errors.New("endpoint does not exist")
 	}
 	return mockNames, nil
+}
+
+// DeleteAllMocks deletes all mocks
+func (r *InMemoryRepository) DeleteAllMocks() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.storage = make(map[string]*models.Mock)
+	r.order = make([]string, 0)
+	r.endpointMocks = make(map[string][]string)
+	return nil
 }
