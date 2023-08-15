@@ -86,6 +86,9 @@ func (app *App) registerMiddlewares() {
 
 // loadInitialMocks loads the initial mocks from the mock file
 func (app *App) loadInitialMocks() {
+	if app.cfg.MockFilePath == "" {
+		return
+	}
 	mocks, err := parsers.FileYAML(app.cfg.MockFilePath)
 	if err != nil {
 		app.log.WithError(err).Error("Failed to parse mocks")
