@@ -1,89 +1,171 @@
 package handlers
 
 import (
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 
+	"github.com/gonfff/mockster/app/models"
 	"github.com/gonfff/mockster/app/repository"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
-// MockHandler is the handler for the /mock/:path route
 type MockHandler struct {
+	mu   sync.Mutex
+	e    *echo.Echo
 	repo repository.MockRepository
+	log  *logrus.Logger
+
+	endpointMocks map[string][]string
 }
 
-// NewMockHandler creates a new MockHandler
-func NewMockHandler(repo repository.MockRepository) *MockHandler {
-	return &MockHandler{repo: repo}
+func NewMockHandler(e *echo.Echo, repo repository.MockRepository, log *logrus.Logger) *MockHandler {
+
+	return &MockHandler{e: e, repo: repo, log: log, endpointMocks: make(map[string][]string)}
 }
 
-// RegisterRoutes registers the routes for the handler
-func (h *MockHandler) RegisterRoutes(e *echo.Echo) {
-	e.Any("/mock/:path", h.Mock)
+func (h *MockHandler) RegisterRoutes() {
+	h.e.Group("/mocks")
+
+	// todo
 }
 
-// Mock is the handler for the /mock/:path route
-func (h *MockHandler) Mock(c echo.Context) error {
-	// prepare
-	path := "/" + c.Param("path")
+func (h *MockHandler) RegisterMock(mock *models.Mock) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	mockNames := h.endpointMocks[mock.Method+mock.Path]
+	mockNames = append(mockNames, mock.Name)
+	h.endpointMocks[mock.Method+mock.Path] = mockNames
+
+	if len(mockNames) == 1 {
+		switch mock.Method {
+		case "GET":
+			h.e.GET(mock.Path, h.Any)
+		case "POST":
+			h.e.POST(mock.Path, h.Any)
+		case "PUT":
+			h.e.PUT(mock.Path, h.Any)
+		case "DELETE":
+			h.e.DELETE(mock.Path, h.Any)
+		case "PATCH":
+			h.e.PATCH(mock.Path, h.Any)
+		case "HEAD":
+			h.e.HEAD(mock.Path, h.Any)
+		case "OPTIONS":
+			h.e.OPTIONS(mock.Path, h.Any)
+		}
+	}
+}
+
+func (h *MockHandler) UnregisterMock(mock *models.Mock) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	mockNames := h.endpointMocks[mock.Method+mock.Path]
+
+	for i, v := range mockNames {
+		if v == mock.Name {
+			mockNames = append(mockNames[:i], mockNames[i+1:]...)
+			break
+		}
+	}
+	h.endpointMocks[mock.Method+mock.Path] = mockNames
+
+	if len(mockNames) == 0 {
+		notFoundFunc := func(c echo.Context) error {
+			return c.JSON(404, JSONNotFound)
+		}
+		switch mock.Method {
+		case "GET":
+			h.e.GET(mock.Path, notFoundFunc)
+		case "POST":
+			h.e.POST(mock.Path, notFoundFunc)
+		case "PUT":
+			h.e.PUT(mock.Path, notFoundFunc)
+		case "DELETE":
+			h.e.DELETE(mock.Path, notFoundFunc)
+		case "PATCH":
+			h.e.PATCH(mock.Path, notFoundFunc)
+		case "HEAD":
+			h.e.HEAD(mock.Path, notFoundFunc)
+		case "OPTIONS":
+			h.e.OPTIONS(mock.Path, notFoundFunc)
+		}
+	}
+}
+
+func (h *MockHandler) validateQuery(c echo.Context, mock *models.Mock) error {
 	request := c.Request()
 
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		return err
 	}
-
 	bodyStr := string(body)
 	bodyStr = strings.ReplaceAll(bodyStr, "\n", "")
 	bodyStr = strings.ReplaceAll(bodyStr, "\t", "")
 
-	name, err := h.repo.GetNameByPathMethod(request.Method, path, bodyStr)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"message": "Not found or body not provided or wrong body"})
-	}
-	// get mock
-	mock, err := h.repo.GetMock(name)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"message": err.Error() + " " + name})
-	}
-
-	// validate request against mock
 	for k, v := range mock.Request.Headers {
 		if request.Header.Get(k) != v {
-			return c.JSON(http.StatusBadRequest, map[string]string{"message": "Header " + k + " is not equal to " + v})
+			return errors.New(fmt.Sprintf("Header %v is not equal to %v", k, v))
 		}
 	}
 
 	for k, v := range mock.Request.Cookies {
 		cookie, err := request.Cookie(k)
 		if err != nil || cookie.Value != v {
-			return c.JSON(http.StatusBadRequest, map[string]string{"message": "Cookie " + k + " is not equal to " + v})
+			return errors.New(fmt.Sprintf("Cookie %v is not equal to %v", k, v))
 		}
 	}
 
 	for k, v := range mock.Request.QueryParams {
 		if request.URL.Query().Get(k) != v {
-			return c.JSON(http.StatusBadRequest, map[string]string{"message": "QueryParam " + k + " is not equal to " + v})
+			return errors.New(fmt.Sprintf("QueryParam %v is not equal to %v", k, v))
 		}
 	}
 
 	if mock.Request.Body != bodyStr {
-		return c.JSON(http.StatusBadRequest, map[string]string{"message": "Body is not equal to " + mock.Request.Body})
+		return errors.New(fmt.Sprintf("Body is not equal to %v", mock.Request.Body))
 	}
 
-	// build response from mock
-	for k, v := range mock.Response.Headers {
-		c.Response().Header().Set(k, v)
+	return nil
+}
+
+func (h *MockHandler) Any(c echo.Context) error {
+	mockNames := h.endpointMocks[mock.Method+mock.Path]
+
+	if len(mockNames) == 0 {
+		return c.JSON(404, JSONNotFound)
 	}
 
-	for k, v := range mock.Response.Cookies {
-		cookie := new(http.Cookie)
-		cookie.Name = k
-		cookie.Value = v
-		c.SetCookie(cookie)
-	}
+	for i, mockName := range mockNames {
+		mock, err := h.repo.GetMock(mockName)
+		if err != nil && i == len(mockNames)-1 {
+			return c.JSON(400, JSONMessageError(err))
+		}
+		c.validateQuery(c, mock)
+		if err != nil {
+			return c.JSON(400, JSONMessageError(err))
+		}
 
-	return c.String(mock.Response.Status, mock.Response.Body)
+		//build response
+		for k, v := range mock.Response.Headers {
+			c.Response().Header().Set(k, v)
+		}
+
+		for k, v := range mock.Response.Cookies {
+			cookie := new(http.Cookie)
+			cookie.Name = k
+			cookie.Value = v
+			c.SetCookie(cookie)
+		}
+
+		return c.String(mock.Response.Status, mock.Response.Body)
+
+	}
 }
