@@ -1,0 +1,6 @@
+{
+    "go.formatTool": "gofmt",
+    "go.formatFlags": ["-lines=100"],
+    "editor.wordWrap": "on",
+    "editor.wordWrapColumn": 100
+}

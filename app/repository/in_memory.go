@@ -75,29 +75,6 @@ func (r *InMemoryRepository) AddMock(mock *models.Mock) error {
 	return nil
 }
 
-// UpdateMock updates the mock with the given name
-func (r *InMemoryRepository) UpdateMock(newMock *models.Mock) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	oldMock, ok := r.storage[newMock.Name]
-	if !ok {
-		return fmt.Errorf("mock with name \"%s\" does not exist", newMock.Name)
-	}
-
-	newKey := fmt.Sprintf("%v %v", newMock.Method, newMock.Path)
-	oldKey := fmt.Sprintf("%v %v", oldMock.Method, oldMock.Path)
-
-	if newKey != oldKey {
-		r.deleteFromEndpoints(oldMock)
-		r.endpointMocks[newKey] = append(r.endpointMocks[newKey], newMock.Name)
-	}
-
-	r.storage[newMock.Name] = newMock
-	return nil
-
-}
-
 // DeleteMock deletes the mock with the given name
 func (r *InMemoryRepository) DeleteMock(name string) error {
 	r.mu.Lock()

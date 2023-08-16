@@ -32,3 +32,17 @@ func FileYAML(filePath string) ([]models.Mock, error) {
 	}
 	return ParseYAML(content)
 }
+
+// ToYAML converts mocks to YAML
+func ToYAML(mocks []*models.Mock) ([]byte, error) {
+	m := &models.Mocks{Mocks: make([]models.Mock, 0, len(mocks))}
+	for _, mock := range mocks {
+		m.Mocks = append(m.Mocks, *mock)
+	}
+	data, err := yaml.Marshal(m)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling mocks to YAML: %w", err)
+	}
+
+	return data, nil
+}

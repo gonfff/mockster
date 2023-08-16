@@ -71,7 +71,7 @@ func (app *App) Setup() {
 
 	handlers.NewPingHandler(app.e).RegisterRoutes()
 	handlers.NewMockHandler(app.e, app.repo, app.log).RegisterRoutes()
-	handlers.NewUploadHandler(app.e, app.repo).RegisterRoutes()
+	handlers.NewManagementHandler(app.e, app.repo, app.log).RegisterRoutes()
 
 	app.registerMiddlewares()
 	app.loadInitialMocks()

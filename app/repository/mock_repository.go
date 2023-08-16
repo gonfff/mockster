@@ -11,7 +11,6 @@ type MockRepository interface {
 	GetMock(name string) (*models.Mock, error)
 	GetMocks() ([]*models.Mock, error)
 	AddMock(mock *models.Mock) error
-	UpdateMock(mock *models.Mock) error
 	DeleteMock(name string) error
 	DeleteAllMocks() error
 	ChangeName(oldName string, newName string) error
