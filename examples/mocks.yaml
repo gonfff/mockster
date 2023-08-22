@@ -6,7 +6,6 @@ mocks:
     response:
       status: 200
 
-
   - name: simple-get-request
     path: /simple/get/request
     method: GET

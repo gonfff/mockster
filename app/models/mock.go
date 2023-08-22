@@ -38,17 +38,15 @@ type Mocks struct {
 }
 
 var validPathRegex = regexp.MustCompile(`^/.*$`)
-var forbiddenCharsRegex = regexp.MustCompile(`[<>{}|\^\[\]"]?&`)
+var forbiddenCharsRegex = regexp.MustCompile(`[<>{}|[\]^"]|&`)
 
 func validHTTPPath(fl validator.FieldLevel) bool {
 	path := fl.Field().String()
 
-	// Проверка на валидный HTTP путь
 	if !validPathRegex.MatchString(path) {
 		return false
 	}
 
-	// Проверка на запрещенные символы
 	if forbiddenCharsRegex.MatchString(path) {
 		return false
 	}
