@@ -9,7 +9,6 @@ import (
 
 // AppConfig is the application configuration. It is filled by the environment
 type AppConfig struct {
-	Environment      string `env:"ENVIRONMENT,notEmpty"`
 	DisableGreetings bool   `env:"DISABLE_GREETINGS" envDefault:"true"`
 	MockFilePath     string `env:"MOCK_FILE_PATH"`
 	LogFormatter     string `env:"LOG_FORMATTER" envDefault:"text"`
@@ -20,21 +19,6 @@ type AppConfig struct {
 	StaticPath       string `env:"STATIC_PATH" envDefault:"app/static"`
 
 	IntLogLevel logrus.Level
-}
-
-// validateEnvironment validates the ENVIRONMENT variable
-// possible values: local, development, production
-func (c *AppConfig) validateEnvironment() error {
-	envs := map[string]string{
-		"local":       "",
-		"developnemt": "",
-		"production":  "",
-	}
-
-	if _, ok := envs[c.Environment]; !ok {
-		return errors.New("value must be one of: local, development, production")
-	}
-	return nil
 }
 
 // validateLogFormatter validates the LOG_FORMATTER variable
@@ -68,9 +52,6 @@ func (c *AppConfig) validateLogLevel() error {
 func NewConfig() (*AppConfig, error) {
 	cfg := &AppConfig{}
 	if err := env.Parse(cfg); err != nil {
-		return nil, err
-	}
-	if err := cfg.validateEnvironment(); err != nil {
 		return nil, err
 	}
 	if err := cfg.validateLogFormatter(); err != nil {

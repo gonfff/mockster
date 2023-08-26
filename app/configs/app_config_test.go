@@ -8,37 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAppConfig_validateEnvironment(t *testing.T) {
-	cases := []struct {
-		name        string
-		environment string
-		expectedErr bool
-	}{
-		{
-			name:        "ValidEnvironment",
-			environment: "local",
-			expectedErr: false,
-		},
-		{
-			name:        "InvalidEnvironment",
-			environment: "invalid",
-			expectedErr: true,
-		},
-	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			config := &AppConfig{Environment: tc.environment}
-			err := config.validateEnvironment()
-			if tc.expectedErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
-}
-
 func TestAppConfig_validateLogFormatter(t *testing.T) {
 	cases := []struct {
 		name         string
@@ -112,7 +81,6 @@ func TestNewConfig(t *testing.T) {
 		{
 			name: "ValidConfig",
 			environmentVars: map[string]string{
-				"ENVIRONMENT":   "local",
 				"LOG_FORMATTER": "text",
 				"LOG_LEVEL":     "info",
 			},
@@ -120,16 +88,13 @@ func TestNewConfig(t *testing.T) {
 			expectedLogLevel: "info",
 		},
 		{
-			name: "InvalidConfig",
-			environmentVars: map[string]string{
-				"ENVIRONMENT": "invalid",
-			},
-			expectedErr: true,
+			name:            "InvalidConfig",
+			environmentVars: map[string]string{"LOG_LEVEL": "qwe"},
+			expectedErr:     true,
 		},
 		{
 			name: "ValidConfig",
 			environmentVars: map[string]string{
-				"ENVIRONMENT":   "local",
 				"LOG_FORMATTER": "qweqwe",
 				"LOG_LEVEL":     "info",
 			},
@@ -139,8 +104,7 @@ func TestNewConfig(t *testing.T) {
 		{
 			name: "ValidConfig",
 			environmentVars: map[string]string{
-				"ENVIRONMENT": "local",
-				"LOG_LEVEL":   "qweqwe",
+				"LOG_LEVEL": "qweqwe",
 			},
 			expectedErr:      true,
 			expectedLogLevel: "info",

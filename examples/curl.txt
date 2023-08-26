@@ -1,0 +1,28 @@
+curl --request GET \
+  --url http://localhost:8080/management/mocks \
+  --header 'Content-Type: application/json' \
+  --header 'accept: application/json' \
+  --cookie sessionID=abcd1234 \
+  --data '{
+	"name": "add-users-ok",
+	"path": "/users",
+	"method": "POST",
+	"request": {
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"query_params": {
+			"qwe": "ewq"
+		},
+		"cookies": null,
+		"body": "{\"name\": \"John\", \"age\": 30}"
+	},
+	"response": {
+		"status": 200,
+		"headers": {
+			"Content-Type": "application/json"
+		},
+		"cookies": null,
+		"body": "{\"message\": \"JSON response\"}"
+	}
+}'
