@@ -86,6 +86,7 @@ func (r *InMemoryRepository) DeleteMock(name string) error {
 	}
 
 	r.deleteFromEndpoints(mock)
+	r.deleteFromOrder(name)
 	delete(r.storage, name)
 	return nil
 }
@@ -142,4 +143,13 @@ func (r *InMemoryRepository) DeleteAllMocks() error {
 	r.order = make([]string, 0)
 	r.endpointMocks = make(map[string][]string)
 	return nil
+}
+
+func (r *InMemoryRepository) deleteFromOrder(name string) {
+	for i, n := range r.order {
+		if n == name {
+			r.order = append(r.order[:i], r.order[i+1:]...)
+			break
+		}
+	}
 }

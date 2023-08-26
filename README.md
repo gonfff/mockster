@@ -12,8 +12,8 @@
 - [X] Write handlers for import and export data with yaml files
 - [X] Write handlers for creating mocks by rest api
 - [X] Write some tests
-- [ ] Write simple UI for managing mocks
-- [ ] Write simple UI for creating mocks
+- [X] Write simple UI for managing mocks
+- [X] Write simple UI for creating mocks
 - [ ] Write CI
 - [ ] Write paper about this project =)
 ## ever or never

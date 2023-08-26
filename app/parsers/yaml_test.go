@@ -136,7 +136,7 @@ func TestFileYAML(t *testing.T) {
 func createTempYAMLFile(t *testing.T, content []byte, fileName string) string {
 	tmpDir := t.TempDir()
 	tmpFile := filepath.Join(tmpDir, fileName)
-	err := os.WriteFile(tmpFile, content, 0644)
+	err := os.WriteFile(tmpFile, content, 0o0644)
 	assert.NoError(t, err)
 	return tmpFile
 }

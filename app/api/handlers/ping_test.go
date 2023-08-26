@@ -11,7 +11,7 @@ import (
 
 func TestPingHandler_RegisterRoutes(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
+	req := httptest.NewRequest(http.MethodGet, "/ping", http.NoBody)
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 

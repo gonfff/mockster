@@ -14,7 +14,7 @@ func TestRecoverMiddleware(t *testing.T) {
 	logger := logrus.New()
 
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 

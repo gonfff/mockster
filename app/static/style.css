@@ -1,0 +1,78 @@
+.custom-bg {
+    background-color: #EBEDF0; 
+  }
+
+  .header {
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+  }
+
+.custom-fg {
+    height: 90vh;
+    border-radius: 10px;
+    background-color: #ffffff;
+
+}
+
+.table-row:hover {
+    background-color: #002fff; 
+}
+
+.main-table-header {
+    background-color: #EBEDF0;
+    color: #9ea4ac;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.main-table{
+    padding-top: 2vh;
+    background-color: #ffffff;
+        max-height: 90vh; 
+        overflow: auto;
+    }
+    
+
+
+.main-table-upper-left-border{
+    border-top-left-radius: 10px;
+}
+
+
+.main-table-upper-right-border{
+    border: 0px solid #dfe2e6;
+    border-top-right-radius: 10px;
+}
+
+.my-button{
+    cursor: pointer;
+}
+
+.import-form{
+    padding-top: 2vh;
+    padding-bottom: 10vh;
+    padding-left: 2vh;
+    padding-right: 2vh;
+    background-color: #ffffff;
+    border-radius: 10px;
+}
+.modal-dialog-right {
+    position: fixed;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+    right: 0px;
+}
+.modal-content-right {
+    height: 100%;
+}
+
+.fixed-footer{
+    position: fixed; 
+    bottom: 2vh; 
+    right: 2vh;
+}
+
+  input:required:invalid {
+    border: 1px solid red;
+  }

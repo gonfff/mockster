@@ -39,7 +39,7 @@ func Test_GetMocks_500(t *testing.T) {
 	log := logrus.New()
 	repo := &repository.TestRepository{}
 
-	req := httptest.NewRequest(http.MethodGet, "/management/mocks", nil)
+	req := httptest.NewRequest(http.MethodGet, "/management/mocks", http.NoBody)
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
@@ -57,7 +57,7 @@ func Test_GetMocks_200(t *testing.T) {
 	log := logrus.New()
 	repo := &repository.TestRepository{}
 
-	req := httptest.NewRequest(http.MethodGet, "/management/mocks", nil)
+	req := httptest.NewRequest(http.MethodGet, "/management/mocks", http.NoBody)
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
@@ -151,7 +151,7 @@ func Test_DeleteMock_RepoFailed400(t *testing.T) {
 	log := logrus.New()
 	repo := &repository.TestRepository{}
 
-	req := httptest.NewRequest(http.MethodDelete, "/management/mocks/test", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/management/mocks/test", http.NoBody)
 
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
@@ -170,7 +170,7 @@ func Test_DeleteMock_OK(t *testing.T) {
 	log := logrus.New()
 	repo := &repository.TestRepository{}
 
-	req := httptest.NewRequest(http.MethodDelete, "/management/mocks/test", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/management/mocks/test", http.NoBody)
 
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)

@@ -40,7 +40,7 @@ func (h *ManagementHandler) GetMocks(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Message{Message: "Failed to get mocks", Details: err.Error()})
 	}
-	return c.JSON(http.StatusOK, PayloadMocks{Data: mocks})
+	return c.JSON(http.StatusOK, PayloadMocks{Items: mocks})
 
 }
 
@@ -105,12 +105,24 @@ func (h *ManagementHandler) ExportMocks(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Message{Message: "Failed to convert mocks to YAML", Details: err.Error()})
 	}
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=mocks.yaml")
 	return c.Blob(http.StatusOK, "application/yaml", data)
 }
 
 // ImportMocks imports mocks from YAML
 func (h *ManagementHandler) ImportMocks(c echo.Context) error {
-	data, err := io.ReadAll(c.Request().Body)
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to read file"})
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to open file"})
+	}
+	defer src.Close()
+
+	data, err := io.ReadAll(src)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to read request body"})
 	}

@@ -16,5 +16,5 @@ var MessageNotFound = Message{Message: "Not found"}
 
 // PayloadMocks is a payload for returning mocks
 type PayloadMocks struct {
-	Data []*models.Mock `json:"data"`
+	Items []*models.Mock `json:"items"`
 }

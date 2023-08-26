@@ -82,6 +82,7 @@ func (app *App) registerMiddlewares() {
 	app.e.Use(middlewares.AccessLogMiddleware(app.log))
 	app.e.Use(middlewares.RecoverMiddleware(app.log))
 	app.e.Pre(middleware.RemoveTrailingSlash())
+	app.e.Use(middleware.Static("static"))
 }
 
 // loadInitialMocks loads the initial mocks from the mock file
