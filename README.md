@@ -1,4 +1,10 @@
 # My pet - Mockster
+<div align="center">
+[![build](https://github.com/gonfff/mockster/actions/workflows/ci.yml/badge.svg)](https://github.com/gonfff/mockster/actions/workflows/ci.yml)&nbsp;
+[![Coverage Status](https://coveralls.io/repos/github/gonfff/mockster/badge.svg?branch=master)](https://coveralls.io/github/https://coveralls.io?branch=master)&nbsp;
+[![Go Report Card](https://goreportcard.com/badge/github.com/gonfff/mockster)](https://goreportcard.com/report/github.com/gonfff/mockster)&nbsp;
+[![codecov](https://codecov.io/gh/gonfff/mockster/branch/master/graph/badge.svg)](https://app.codecov.io/gh/gonfff/mockster)
+</div>
 ---
 ## Todo plan
 - [X] Come up with a schema for yaml files for mock endpoints

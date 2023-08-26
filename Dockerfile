@@ -2,6 +2,7 @@ FROM golang:1.21-alpine as build
 
 ENV CGO_ENABLED=0
 ENV GOOS=linux
+ENV GOFLAGS=-mod=vendor
 
 WORKDIR /build
 
