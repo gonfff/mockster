@@ -1,10 +1,5 @@
-# My pet - Mockster
-<div align="center">
-[![build](https://github.com/gonfff/mockster/actions/workflows/ci.yml/badge.svg)](https://github.com/gonfff/mockster/actions/workflows/ci.yml)&nbsp;
-[![Coverage Status](https://coveralls.io/repos/github/gonfff/mockster/badge.svg?branch=master)](https://coveralls.io/github/https://coveralls.io?branch=master)&nbsp;
-[![Go Report Card](https://goreportcard.com/badge/github.com/gonfff/mockster)](https://goreportcard.com/report/github.com/gonfff/mockster)&nbsp;
-[![codecov](https://codecov.io/gh/gonfff/mockster/branch/master/graph/badge.svg)](https://app.codecov.io/gh/gonfff/mockster)
-</div>
+# Mockster [![Build Status](https://github.com/gonfff/mockster/actions/workflows/ci.yaml/badge.svg)](https://github.com/gonfff/mockster/actions/workflows/ci.yaml) [![Coverage Status](https://coveralls.io/repos/github/gonfff/mockster/badge.svg?branch=master)](https://coveralls.io/github/gonfff/mockster?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/gonfff/mockster)](https://goreportcard.com/report/github.com/gonfff/mockster) [![codecov](https://codecov.io/gh/gonfff/mockster/branch/master/graph/badge.svg)](https://codecov.io/gh/gonfff/mockster)
+
 ---
 ## Todo plan
 - [X] Come up with a schema for yaml files for mock endpoints
@@ -20,7 +15,7 @@
 - [X] Write some tests
 - [X] Write simple UI for managing mocks
 - [X] Write simple UI for creating mocks
-- [ ] Write CI
+- [X] Write CI
 - [ ] Write paper about this project =)
 ## ever or never
 - [ ] Add BoltDB or RocksDB as storage
