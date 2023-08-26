@@ -6,7 +6,7 @@ Mockster is a minimalistic, lightweight and simple mock server for testing your 
 ## Run app
 
 ```bash
-docker run -p 8080:8080 --rm ghcr.io/gonfff/mockster:v0.0.1
+docker run -p 8080:8080 --rm ghcr.io/gonfff/mockster:<version>
 ```
 
 ## Create mocks
