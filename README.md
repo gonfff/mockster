@@ -17,7 +17,7 @@ docker run -p 8080:8080 --rm ghcr.io/gonfff/mockster:<version>
 
 ## Request mocks
 
-By sending a request to the `/mocks/<your_path>` endpoint and providing all nessessary headers, body, cookies, query params.
+By sending a request to the `/mock/<your_path>` endpoint and providing all nessessary headers, body, cookies, query params.
 
 ## UI
 Mockster has a simple UI for creating and managing mocks. It is available on the `/` endpoint.
