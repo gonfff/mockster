@@ -1,49 +1,49 @@
-document.addEventListener('DOMContentLoaded', async function () {
-    await requestTable();
-})
-    
-async function requestTable(){
-    const tableBody = document.getElementById('table-body');
-    
-    try {
-        const response = await fetch('/management/mocks');
-        if (response.ok) {
-            const mocks = await response.json();
-            
-            const listData = mocks.items.map(item => ({
-                ...item,
-            }));
-            const mapData = {};
-            for (const item of listData) {
-                mapData[item.name] = item;
-            }
+document.addEventListener("DOMContentLoaded", async function () {
+  await requestTable();
+});
 
-            localStorage.setItem('tableData', JSON.stringify(mapData));
-            ordering = localStorage.getItem('ordering');
-            if (ordering) {
-                orderBy(ordering);
-            } else {
-                orderBy('name');
-            }
-            localStorage.setItem('ordering', 'name');
-            
-            const tableHTML = generateTableHTML(listData);
-            tableBody.innerHTML = tableHTML;
-        } else {
-            console.error('Failed to fetch JSON data');
-        }
-    } catch (error) {
-        console.error('An error occurred:', error);
+async function requestTable() {
+  const tableBody = document.getElementById("table-body");
+
+  try {
+    const response = await fetch("/management/mocks");
+    if (response.ok) {
+      const mocks = await response.json();
+
+      const listData = mocks.items.map((item) => ({
+        ...item,
+      }));
+      const mapData = {};
+      for (const item of listData) {
+        mapData[item.name] = item;
+      }
+
+      localStorage.setItem("tableData", JSON.stringify(mapData));
+      ordering = localStorage.getItem("ordering");
+      if (ordering) {
+        orderBy(ordering);
+      } else {
+        orderBy("name");
+      }
+      localStorage.setItem("ordering", "name");
+
+      const tableHTML = generateTableHTML(listData);
+      tableBody.innerHTML = tableHTML;
+    } else {
+      console.error("Failed to fetch JSON data");
     }
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
 }
 
 function generateTableHTML(data) {
-    let tableHTML = '';
+  let tableHTML = "";
 
-    let i = 0;
-    data.forEach(item => {
-        i += 1;
-        tableHTML += `
+  let i = 0;
+  data.forEach((item) => {
+    i += 1;
+    tableHTML += `
             <tr>
                 <td class="align-middle">${i}</td>
                 <td class="text-primary align-middle"><span class="my-button" onClick="editModal('${item.name}')">${item.name}</span></td>
@@ -59,42 +59,42 @@ function generateTableHTML(data) {
                 </td>        
             </tr>
         `;
-    });
-    return tableHTML;
+  });
+  return tableHTML;
 }
 
-function orderBy(field){
-    const tableData = JSON.parse(localStorage.getItem('tableData'));
-    const listData = Object.values(tableData);
-    let sortedData;
-    if (field === 'status') {
+function orderBy(field) {
+  const tableData = JSON.parse(localStorage.getItem("tableData"));
+  const listData = Object.values(tableData);
+  let sortedData;
+  if (field === "status") {
     sortedData = listData.sort((a, b) => {
-        if (a['response'][field] > b['response'][field]) {
-            return 1;
-        } else if (a['response'][field] < b['response'][field]) {
-            return -1;
-        } else {
-            return 0;
-        }
+      if (a["response"][field] > b["response"][field]) {
+        return 1;
+      } else if (a["response"][field] < b["response"][field]) {
+        return -1;
+      } else {
+        return 0;
+      }
     });
-    } else {
+  } else {
     sortedData = listData.sort((a, b) => {
-        if (a[field] > b[field]) {
-            return 1;
-        } else if (a[field] < b[field]) {
-            return -1;
-        } else {
-            return 0;
-        }
+      if (a[field] > b[field]) {
+        return 1;
+      } else if (a[field] < b[field]) {
+        return -1;
+      } else {
+        return 0;
+      }
     });
-    }
-    localStorage.setItem('ordering', field);
-    const tableHTML = generateTableHTML(sortedData);
-    document.getElementById('table-body').innerHTML = tableHTML;
+  }
+  localStorage.setItem("ordering", field);
+  const tableHTML = generateTableHTML(sortedData);
+  document.getElementById("table-body").innerHTML = tableHTML;
 }
 
 function deleteModal(name) {
-    const modalHTML = `
+  const modalHTML = `
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -112,13 +112,15 @@ function deleteModal(name) {
             </div>
         </div>
     </div>`;
-    document.getElementById('delete-modal-container').innerHTML = modalHTML; 
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal')); 
-    deleteModal.show(); 
+  document.getElementById("delete-modal-container").innerHTML = modalHTML;
+  const deleteModal = new bootstrap.Modal(
+    document.getElementById("deleteModal")
+  );
+  deleteModal.show();
 }
 
 function toasts(title, status, text) {
-    const toastHTML = `
+  const toastHTML = `
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
@@ -131,78 +133,81 @@ function toasts(title, status, text) {
             </div>
         </div>
     </div>`;
-    document.getElementById('toast-container').innerHTML = toastHTML;
-    const toastEl = document.getElementById('liveToast');
-    const toast = new bootstrap.Toast(toastEl);
-    toast.show();
+  document.getElementById("toast-container").innerHTML = toastHTML;
+  const toastEl = document.getElementById("liveToast");
+  const toast = new bootstrap.Toast(toastEl);
+  toast.show();
 }
 
 function deleteMock(name) {
-    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+  const deleteModal = new bootstrap.Modal(
+    document.getElementById("deleteModal")
+  );
 
-
-    fetch(`/management/mocks/${name}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+  fetch(`/management/mocks/${name}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json().then((data) => {
+          toasts(`delete ${name}`, response.status, `Mock ${name} deleted`);
+        });
+      } else {
+        return response.json().then((data) => {
+          toasts(
+            `delete ${name}`,
+            response.status,
+            data.message + ". " + data.details
+          );
+        });
+      }
     })
-    .then(response => {
-        if (response.ok) {
-            return response.json().then(data => {
-                toasts(`delete ${name}`, response.status, `Mock ${name} deleted`);
-            }); 
-        } else {
-            return response.json().then(data => {
-                toasts(`delete ${name}`, response.status, data.message+'. '+data.details);
-            });
-        }
-    })
-    .catch(error => {
-        toasts('delete mock', 'ERROR', error.message);
+    .catch((error) => {
+      toasts("delete mock", "ERROR", error.message);
     });
 
-    const tableData = JSON.parse(localStorage.getItem('tableData'));
-    delete tableData[name];
-    localStorage.setItem('tableData', JSON.stringify(tableData));
+  const tableData = JSON.parse(localStorage.getItem("tableData"));
+  delete tableData[name];
+  localStorage.setItem("tableData", JSON.stringify(tableData));
 
-    const ordering = localStorage.getItem('ordering');
-    orderBy(ordering);
-
+  const ordering = localStorage.getItem("ordering");
+  orderBy(ordering);
 }
 
 async function importYaml(e) {
-    e.preventDefault();
-  
-    const form = document.getElementById('fileInput'); 
-    const formData = new FormData(form);
+  e.preventDefault();
 
-    try {
-        const response = await fetch('/management/mocks/actions/import', {
-            method: 'POST',
-            body: formData,
-        });
+  const form = document.getElementById("fileInput");
+  const formData = new FormData(form);
 
-        form.reset();
-        
-        const data = await response.json();
-        toasts('import', response.status, data.message);
+  try {
+    const response = await fetch("/management/mocks/actions/import", {
+      method: "POST",
+      body: formData,
+    });
 
-        await requestTable();
-        const ordering = localStorage.getItem('ordering');
-        orderBy(ordering);
+    form.reset();
 
-    } catch (error) {
-        toasts('import', 'ERROR', error.message);
-    }
+    const data = await response.json();
+    toasts("import", response.status, data.message);
+
+    await requestTable();
+    const ordering = localStorage.getItem("ordering");
+    orderBy(ordering);
+  } catch (error) {
+    toasts("import", "ERROR", error.message);
+  }
 }
 
-function editorForm(action, name=""){
-    const textAction = action === 'edit' ? 'Edit' : 'Create';
-    const saveFunc = action === 'edit' ? `saveEditForm('${name}')` : 'saveCreateForm()';
+function editorForm(action, name = "") {
+  const textAction = action === "edit" ? "Edit" : "Create";
+  const saveFunc =
+    action === "edit" ? `saveEditForm('${name}')` : "saveCreateForm()";
 
-
-    const editorFormHTML = `
+  const editorFormHTML = `
     <div class="modal" id="Editor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-right">
             <div class="modal-content modal-content-right">
@@ -274,211 +279,214 @@ function editorForm(action, name=""){
             </div>
         </div>
     </div>`;
-    return editorFormHTML;
+  return editorFormHTML;
 }
 
 function createModal() {
-    const editorFormHTML = editorForm('create');
-    document.getElementById('editor-modal-container').innerHTML = editorFormHTML; 
-    const Modal = new bootstrap.Modal(document.getElementById('Editor')); 
-    Modal.show(); 
+  const editorFormHTML = editorForm("create");
+  document.getElementById("editor-modal-container").innerHTML = editorFormHTML;
+  const Modal = new bootstrap.Modal(document.getElementById("Editor"));
+  Modal.show();
 }
 
-function makeEditModal(mock){
-    const editorFormHTML = editorForm('edit', mock.name);
-    document.getElementById('editor-modal-container').innerHTML = editorFormHTML; 
-    const Modal = new bootstrap.Modal(document.getElementById('Editor')); 
-    Modal.show(); 
+function makeEditModal(mock) {
+  const editorFormHTML = editorForm("edit", mock.name);
+  document.getElementById("editor-modal-container").innerHTML = editorFormHTML;
+  const Modal = new bootstrap.Modal(document.getElementById("Editor"));
+  Modal.show();
 
-    document.getElementById('name').value = mock.name;
-    document.getElementById('path').value = mock.path;
-    document.getElementById('method').value = mock.method;
+  document.getElementById("name").value = mock.name;
+  document.getElementById("path").value = mock.path;
+  document.getElementById("method").value = mock.method;
 
-    requestHeaders = JSON.stringify(mock.request.headers, null, 2);
-    document.getElementById('requestHeaders').value = requestHeaders === 'null' ? '' : requestHeaders;
+  requestHeaders = JSON.stringify(mock.request.headers, null, 2);
+  document.getElementById("requestHeaders").value =
+    requestHeaders === "null" ? "" : requestHeaders;
 
-    requestQueryParams = JSON.stringify(mock.request.query_params, null, 2);
-    document.getElementById('requestQueryParams').value = requestQueryParams === 'null' ? '' : requestQueryParams;
+  requestQueryParams = JSON.stringify(mock.request.query_params, null, 2);
+  document.getElementById("requestQueryParams").value =
+    requestQueryParams === "null" ? "" : requestQueryParams;
 
-    requestCookies = JSON.stringify(mock.request.cookies, null, 2);
-    document.getElementById('requestCookies').value = requestCookies === 'null' ? '' : requestCookies;
-    
-    document.getElementById('requestBody').value = mock.request.body;
+  requestCookies = JSON.stringify(mock.request.cookies, null, 2);
+  document.getElementById("requestCookies").value =
+    requestCookies === "null" ? "" : requestCookies;
 
-    document.getElementById('responseStatus').value = mock.response.status;
+  document.getElementById("requestBody").value = mock.request.body;
 
-    responseHeaders = JSON.stringify(mock.response.headers, null, 2);
-    document.getElementById('responseHeaders').value = responseHeaders === 'null' ? '' : responseHeaders;
+  document.getElementById("responseStatus").value = mock.response.status;
 
-    responseCookies = JSON.stringify(mock.response.cookies, null, 2);
-    document.getElementById('responseCookies').value = responseCookies === 'null' ? '' : responseCookies;
+  responseHeaders = JSON.stringify(mock.response.headers, null, 2);
+  document.getElementById("responseHeaders").value =
+    responseHeaders === "null" ? "" : responseHeaders;
 
-    document.getElementById('responseBody').value = mock.response.body;   
+  responseCookies = JSON.stringify(mock.response.cookies, null, 2);
+  document.getElementById("responseCookies").value =
+    responseCookies === "null" ? "" : responseCookies;
+
+  document.getElementById("responseBody").value = mock.response.body;
 }
 
 function hideModal() {
-    const Modal = bootstrap.Modal.getInstance(document.getElementById('Editor'));
-    Modal.hide();
+  const Modal = bootstrap.Modal.getInstance(document.getElementById("Editor"));
+  Modal.hide();
 }
 
-function plainToMockObj(data){
-    const obj = {};
-    obj.response = {};
-    obj.request = {};
+function plainToMockObj(data) {
+  const obj = {};
+  obj.response = {};
+  obj.request = {};
 
-    obj.name = data.name;
-    obj.path = data.path;
-    obj.method = data.method;
+  obj.name = data.name;
+  obj.path = data.path;
+  obj.method = data.method;
 
-    obj.request.headers = parseJSON(data.requestHeaders);
-    obj.request.query_params = parseJSON(data.requestQueryParams);
-    obj.request.cookies = parseJSON(data.requestCookies);
-    obj.request.body = data.requestBody || null;
+  obj.request.headers = parseJSON(data.requestHeaders);
+  obj.request.query_params = parseJSON(data.requestQueryParams);
+  obj.request.cookies = parseJSON(data.requestCookies);
+  obj.request.body = data.requestBody || null;
 
-    obj.response.status = parseInt(data.responseStatus);
-    obj.response.headers = parseJSON(data.responseHeaders);
-    obj.response.cookies = parseJSON(data.responseCookies);
-    obj.response.body = data.responseBody || null;
+  obj.response.status = parseInt(data.responseStatus);
+  obj.response.headers = parseJSON(data.responseHeaders);
+  obj.response.cookies = parseJSON(data.responseCookies);
+  obj.response.body = data.responseBody || null;
 
-    return obj;
+  return obj;
 }
 
 function parseJSON(data) {
-    if (!data) {
-        return null;
-    }
+  if (!data) {
+    return null;
+  }
 
-    try {
-        return JSON.parse(data);
-    } catch (error) {
-        throw error;
-    }
+  try {
+    return JSON.parse(data);
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function saveCreateForm(name) {
-    event.preventDefault();
-    const form = document.getElementById('jsonForm'); 
+  event.preventDefault();
+  const form = document.getElementById("jsonForm");
 
-    let formData;
-    try {
-        formData = new FormData(form);
-    } catch (error) {
-        toasts('create', 'InvalidJson', error.message);
-        return;
+  let formData;
+  try {
+    formData = new FormData(form);
+  } catch (error) {
+    toasts("create", "InvalidJson", error.message);
+    return;
+  }
+
+  const jsonObject = {};
+  formData.forEach((value, key) => {
+    jsonObject[key] = value;
+  });
+
+  let sendObj;
+  try {
+    sendObj = plainToMockObj(jsonObject);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      toasts("create", "ValidationFailed", error.message);
+      return;
     }
+  }
 
-    const jsonObject = {};
-    formData.forEach((value, key) => {
-        jsonObject[key] = value;
+  try {
+    const response = await fetch("/management/mocks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(sendObj),
     });
 
-    let sendObj;
-    try {
-        sendObj = plainToMockObj(jsonObject);
-        } catch (error) {
-            if (error instanceof SyntaxError) {
-            toasts('create', 'ValidationFailed', error.message);
-            return;
-            }
-        }
-    
-    try {
-        const response = await fetch("/management/mocks", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(sendObj)
-        });
-
-        if (response.ok) {
-            hideModal();
-            const data = await response.json();
-            toasts('create', response.status, data.message);
-            await requestTable();
-
-        } else {
-            const data = await response.json();
-            toasts('create', response.status, data.message +'. '+ data.details);
-        }
-    } catch (error) {
-        toasts('create', 'Error', error.message);
+    if (response.ok) {
+      hideModal();
+      const data = await response.json();
+      toasts("create", response.status, data.message);
+      await requestTable();
+    } else {
+      const data = await response.json();
+      toasts("create", response.status, data.message + ". " + data.details);
     }
+  } catch (error) {
+    toasts("create", "Error", error.message);
+  }
 }
 
 function editModal(name) {
-    const tableData = JSON.parse(localStorage.getItem('tableData'));
-    const item = tableData[name];
-    makeEditModal(item);
+  const tableData = JSON.parse(localStorage.getItem("tableData"));
+  const item = tableData[name];
+  makeEditModal(item);
 }
 
-async function saveEditForm(name){
-    event.preventDefault();
-    const form = document.getElementById('jsonForm'); 
+async function saveEditForm(name) {
+  event.preventDefault();
+  const form = document.getElementById("jsonForm");
 
-    let formData;
-    try {
-        formData = new FormData(form);
-    } catch (error) {
-        toasts('edit', 'InvalidJson', error.message);
-        return;
+  let formData;
+  try {
+    formData = new FormData(form);
+  } catch (error) {
+    toasts("edit", "InvalidJson", error.message);
+    return;
+  }
+
+  const jsonObject = {};
+  formData.forEach((value, key) => {
+    jsonObject[key] = value;
+  });
+
+  let sendObj;
+  try {
+    sendObj = plainToMockObj(jsonObject);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      toasts("edit", "ValidationFailed", error.message);
+      return;
     }
+  }
 
-    const jsonObject = {};
-    formData.forEach((value, key) => {
-        jsonObject[key] = value;
+  try {
+    const response = await fetch(`/management/mocks/${name}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(sendObj),
     });
 
-    let sendObj;
-    try {
-        sendObj = plainToMockObj(jsonObject);
-        } catch (error) {
-            if (error instanceof SyntaxError) {
-            toasts('edit', 'ValidationFailed', error.message);
-            return;
-            }
-        }
-    
-    try {
-        const response = await fetch(`/management/mocks/${name}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(sendObj)
-        });
-
-        if (response.ok) {
-            hideModal();
-            const data = await response.json();
-            toasts('edit', response.status, data.message);
-            await requestTable();
-
-        } else {
-            const data = await response.json();
-            toasts('edit', response.status, data.message +'. '+ data.details);
-        }
-    } catch (error) {
-        toasts('edit', 'Error', error.message);
+    if (response.ok) {
+      hideModal();
+      const data = await response.json();
+      toasts("edit", response.status, data.message);
+      await requestTable();
+    } else {
+      const data = await response.json();
+      toasts("edit", response.status, data.message + ". " + data.details);
     }
+  } catch (error) {
+    toasts("edit", "Error", error.message);
+  }
 }
 
-function searchMocks(){
-    event.preventDefault();
-    const form = document.getElementById('search-form'); 
-    const formData = new FormData(form);
-    const query = formData.get('query'); 
+function searchMocks() {
+  event.preventDefault();
+  const form = document.getElementById("search-form");
+  const formData = new FormData(form);
+  const query = formData.get("query");
 
-    if (!query) {
-        requestTable();
-    }
+  if (!query) {
+    requestTable();
+  }
 
-    const tableBody = document.getElementById('table-body');
+  const tableBody = document.getElementById("table-body");
 
-    const tableData = JSON.parse(localStorage.getItem('tableData'));
-    const listData = Object.values(tableData);
-    const filteredData = listData.filter(item => item.name.includes(query));
+  const tableData = JSON.parse(localStorage.getItem("tableData"));
+  const listData = Object.values(tableData);
+  const filteredData = listData.filter((item) => item.name.includes(query));
 
-    const tableHTML = generateTableHTML(filteredData);
-    tableBody.innerHTML = tableHTML;
+  const tableHTML = generateTableHTML(filteredData);
+  tableBody.innerHTML = tableHTML;
 }

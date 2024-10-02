@@ -10,98 +10,98 @@
 </head>
 
 <body class="custom-bg">
-<!-- menu bar -->
-<div class="container header">
-    <div class="d-flex justify-content-between align-items-center">
-        <ul class="nav nav-pills">
-            <li class="nav-item">
-                <a class="nav-link text-secondary" href="https://github.com/gonfff/mockster"">Mockster
-                    <svg xmlns="
-                        http://www.w3.org/2000/svg" fill="gray" class="bi bi-github" width="25" height="25"
-                     viewBox="0 0 16 16">
+    <!-- menu bar -->
+    <div class="container header">
+        <div class="d-flex justify-content-between align-items-center">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link text-secondary" href="https://github.com/gonfff/mockster"">Mockster
+                    <svg xmlns=" http://www.w3.org/2000/svg" fill="gray" class="bi bi-github" width="25" height="25"
+                        viewBox="0 0 16 16">
                         <path
-                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                    </svg>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link active my-button" aria-current="page" onclick="createModal()">Create</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link my-button" data-bs-toggle="modal" data-bs-target="#Uploader">Import</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/management/mocks/actions/export">Export</a>
-            </li>
-        </ul>
-        <a class="nav-link disabled" aria-disabled="true">base path: /mock</a>
-        <form class="d-flex" role="search" id="search-form">
-            <input class="form-control me-2" id="search-query"  name="query" type="search" placeholder="Mock Name" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit" onclick="searchMocks()">Search</button>
-        </form>
-    </div>
-</div>
-
-<!-- main table -->
-<div class="container custom-fg">
-    <div class="container main-table">
-        <table class="table table-hover">
-            <thead>
-            <tr class="main-table-header">
-                <th scope="col" class="main-table-upper-left-border">#</th>
-                <th scope="col" class="my-button" onClick="orderBy('name')">Name</th>
-                <th scope="col" class="my-button" onClick="orderBy('method')">Method</th>
-                <th scope="col" class="my-button" onClick="orderBy('path')">Path</th>
-                <th scope="col" class="my-button" onClick="orderBy('status')">Status</th>
-                <th scope="col" class="main-table-upper-right-border"></th>
-            </tr>
-            </thead>
-            <tbody id="table-body">
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-<!-- Uploader Modal -->
-<div class="modal fade" id="Uploader" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5 text-danger" id="exampleModalLabel">This Action Delete All Present Mocks
-                </h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="drop-area" id="dropArea">
-                    <form id="fileInput">
-                        <div class="form-group" style="padding-bottom: 2vh;">
-                            <input type="file" class="form-control-file" name="file">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal"
-                                    onClick="importYaml(event)">Import
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+                        </svg>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active my-button" aria-current="page" onclick="createModal()">Create</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link my-button" data-bs-toggle="modal" data-bs-target="#Uploader">Import</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/management/mocks/actions/export">Export</a>
+                </li>
+            </ul>
+            <a class="nav-link disabled" aria-disabled="true">base path: /mock</a>
+            <form class="d-flex" role="search" id="search-form">
+                <input class="form-control me-2" id="search-query" name="query" type="search" placeholder="Mock Name"
+                    aria-label="Search">
+                <button class="btn btn-outline-success" type="submit" onclick="searchMocks()">Search</button>
+            </form>
         </div>
     </div>
-</div>
+
+    <!-- main table -->
+    <div class="container custom-fg">
+        <div class="container main-table">
+            <table class="table table-hover">
+                <thead>
+                    <tr class="main-table-header">
+                        <th scope="col" class="main-table-upper-left-border">#</th>
+                        <th scope="col" class="my-button" onClick="orderBy('name')">Name</th>
+                        <th scope="col" class="my-button" onClick="orderBy('method')">Method</th>
+                        <th scope="col" class="my-button" onClick="orderBy('path')">Path</th>
+                        <th scope="col" class="my-button" onClick="orderBy('status')">Status</th>
+                        <th scope="col" class="main-table-upper-right-border"></th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 
-<!-- Modal -->
-<div id="delete-modal-container"></div>
-<!-- Toasts -->
-<div id="toast-container"></div>
-<!-- Editor -->
-<div id="editor-modal-container"></div>
+    <!-- Uploader Modal -->
+    <div class="modal fade" id="Uploader" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 text-danger" id="exampleModalLabel">This Action Delete All Present Mocks
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="drop-area" id="dropArea">
+                        <form id="fileInput">
+                            <div class="form-group" style="padding-bottom: 2vh;">
+                                <input type="file" class="form-control-file" name="file">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal"
+                                    onClick="importYaml(event)">Import
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-<script src="bootstrap/bootstrap.min.js"></script>
-<script src="script.js"></script>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div id="delete-modal-container"></div>
+    <!-- Toasts -->
+    <div id="toast-container"></div>
+    <!-- Editor -->
+    <div id="editor-modal-container"></div>
+
+    <script src="bootstrap/bootstrap.min.js"></script>
+    <script src="script.js"></script>
 </body>
 
 </html>

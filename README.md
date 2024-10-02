@@ -1,4 +1,24 @@
-# Mockster [![Build Status](https://github.com/gonfff/mockster/actions/workflows/ci.yaml/badge.svg)](https://github.com/gonfff/mockster/actions/workflows/ci.yaml) [![Go Report Card](https://goreportcard.com/badge/github.com/gonfff/mockster)](https://goreportcard.com/report/github.com/gonfff/mockster) [![Coveralls](https://coveralls.io/repos/github/gonfff/mockster/badge.svg?branch=master)](https://coveralls.io/github/gonfff/mockster?branch=master) [![codecov](https://codecov.io/gh/gonfff/mockster/branch/master/graph/badge.svg)](https://codecov.io/gh/gonfff/mockster)
+
+<p align="center">
+    <img src="mockster.svg" alt="Mockster" width="200">
+</p>
+<p align="center">
+  <a href="https://github.com/gonfff/mockster/actions/workflows/ci.yaml">
+    <img src="https://github.com/gonfff/mockster/actions/workflows/ci.yaml/badge.svg" alt="Build Status">
+  </a>
+  <a href="https://goreportcard.com/report/github.com/gonfff/mockster">
+    <img src="https://goreportcard.com/badge/github.com/gonfff/mockster" alt="Go Report Card">
+  </a>
+  <a href="https://coveralls.io/github/gonfff/mockster?branch=master">
+    <img src="https://coveralls.io/repos/github/gonfff/mockster/badge.svg?branch=master" alt="Coveralls">
+  </a>
+  <a href="https://codecov.io/gh/gonfff/mockster">
+    <img src="https://codecov.io/gh/gonfff/mockster/branch/master/graph/badge.svg" alt="codecov">
+  </a>
+</p>
+
+
+
 
 Mockster is a minimalistic, lightweight and simple mock server for testing your http clients. It can be embedded in your CI pipeline for tests or used as a standalone server while developing your application.
 

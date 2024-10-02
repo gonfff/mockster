@@ -1,5 +1,5 @@
 .custom-bg {
-    background-color: #EBEDF0; 
+    background-color: #EBEDF0;
   }
 
   .header {
@@ -15,7 +15,7 @@
 }
 
 .table-row:hover {
-    background-color: #002fff; 
+    background-color: #002fff;
 }
 
 .main-table-header {
@@ -28,10 +28,9 @@
 .main-table{
     padding-top: 2vh;
     background-color: #ffffff;
-        max-height: 90vh; 
+        max-height: 90vh;
         overflow: auto;
     }
-    
 
 
 .main-table-upper-left-border{
@@ -68,8 +67,8 @@
 }
 
 .fixed-footer{
-    position: fixed; 
-    bottom: 2vh; 
+    position: fixed;
+    bottom: 2vh;
     right: 2vh;
 }
 
