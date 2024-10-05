@@ -15,7 +15,7 @@ func AccessLogMiddleware(log *logrus.Logger) echo.MiddlewareFunc {
 		LogURI:     true,
 		LogStatus:  true,
 		LogMethod:  true,
-		LogValuesFunc: func(c echo.Context, values middleware.RequestLoggerValues) error {
+		LogValuesFunc: func(_ echo.Context, values middleware.RequestLoggerValues) error {
 			log.WithFields(logrus.Fields{
 				"method":  values.Method,
 				"URI":     values.URI,

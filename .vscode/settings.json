@@ -2,5 +2,6 @@
     "go.formatTool": "gofmt",
     "go.formatFlags": ["-lines=100"],
     "editor.wordWrap": "on",
-    "editor.wordWrapColumn": 100
+    "editor.wordWrapColumn": 100,
+    "makefile.configureOnOpen": false
 }

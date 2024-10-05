@@ -20,7 +20,7 @@ func TestRecoverMiddleware(t *testing.T) {
 
 	middleware := RecoverMiddleware(logger)
 
-	handler := func(c echo.Context) error {
+	handler := func(_ echo.Context) error {
 		panic("test panic")
 	}
 
