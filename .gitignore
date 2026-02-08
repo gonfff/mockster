@@ -19,7 +19,7 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 go.work
@@ -205,3 +205,6 @@ Temporary Items
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/go,jetbrains,visualstudiocode,linux,macos
+
+node_modules/
+app/static/script.js

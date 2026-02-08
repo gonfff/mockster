@@ -7,12 +7,10 @@ import (
 	"sync"
 
 	"github.com/gonfff/mockster/app/models"
-	"github.com/sirupsen/logrus"
 )
 
 // InMemoryRepository is an in-memory implementation of the MockRepository
 type InMemoryRepository struct {
-	log     *logrus.Logger
 	mu      sync.RWMutex
 	storage map[string]*models.Mock
 
@@ -21,8 +19,8 @@ type InMemoryRepository struct {
 }
 
 // NewInMemoryRepository creates a new InMemoryRepository
-func NewInMemoryRepository(log *logrus.Logger) *InMemoryRepository {
-	r := &InMemoryRepository{log: log}
+func NewInMemoryRepository() *InMemoryRepository {
+	r := &InMemoryRepository{}
 	if r.storage == nil {
 		r.storage = make(map[string]*models.Mock)
 	}
@@ -30,7 +28,6 @@ func NewInMemoryRepository(log *logrus.Logger) *InMemoryRepository {
 		r.endpointMocks = make(map[string][]string)
 	}
 	return r
-
 }
 
 // GetMock returns the mock with the given name
@@ -91,26 +88,6 @@ func (r *InMemoryRepository) DeleteMock(name string) error {
 	return nil
 }
 
-// ChangeName changes the name of the mock
-func (r *InMemoryRepository) ChangeName(oldName, newName string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	mock, ok := r.storage[oldName]
-	if !ok {
-		return fmt.Errorf("mock with name \"%s\" does not exist", oldName)
-
-	}
-	r.deleteFromEndpoints(mock)
-
-	mock.Name = newName
-	endpoint := fmt.Sprintf("%v %v", mock.Method, mock.Path)
-	r.endpointMocks[endpoint] = append(r.endpointMocks[endpoint], newName)
-	delete(r.storage, oldName)
-	r.storage[newName] = mock
-	return nil
-}
-
 // deleteFromEndpoints deletes the mock from the endpointMocks map
 func (r *InMemoryRepository) deleteFromEndpoints(mock *models.Mock) {
 	endpoint := fmt.Sprintf("%v %v", mock.Method, mock.Path)
@@ -132,17 +109,6 @@ func (r *InMemoryRepository) GetMockNames(endpoint string) ([]string, error) {
 		return nil, errors.New("endpoint does not exist")
 	}
 	return mockNames, nil
-}
-
-// DeleteAllMocks deletes all mocks
-func (r *InMemoryRepository) DeleteAllMocks() error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	r.storage = make(map[string]*models.Mock)
-	r.order = make([]string, 0)
-	r.endpointMocks = make(map[string][]string)
-	return nil
 }
 
 // UpdateMock updates an existing mock atomically.

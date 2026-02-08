@@ -12,7 +12,6 @@ import (
 	"github.com/gonfff/mockster/app/repository"
 	"github.com/gonfff/mockster/app/services"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -38,14 +37,13 @@ var testMockPing = &models.Mock{
 
 func Test_GetMocks_500(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodGet, "/management/mocks", http.NoBody)
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("GetMocks").Return([]*models.Mock{testMock}, errors.New("test"))
@@ -56,14 +54,13 @@ func Test_GetMocks_500(t *testing.T) {
 
 func Test_GetMocks_200(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodGet, "/management/mocks", http.NoBody)
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("GetMocks").Return([]*models.Mock{testMock}, nil)
@@ -74,7 +71,6 @@ func Test_GetMocks_200(t *testing.T) {
 
 func Test_ImportMocks_OK(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	body := &bytes.Buffer{}
@@ -88,7 +84,7 @@ func Test_ImportMocks_OK(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("ReplaceAll", mock.Anything).Return(nil)
@@ -99,7 +95,6 @@ func Test_ImportMocks_OK(t *testing.T) {
 
 func Test_ImportMocks_ReplaceFailed400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	body := &bytes.Buffer{}
@@ -113,7 +108,7 @@ func Test_ImportMocks_ReplaceFailed400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("ReplaceAll", mock.Anything).Return(errors.New("test"))
@@ -124,7 +119,6 @@ func Test_ImportMocks_ReplaceFailed400(t *testing.T) {
 
 func Test_CreateMock_201(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPost, "/management/mocks", bytes.NewBuffer(testMockPingBytes))
@@ -132,7 +126,7 @@ func Test_CreateMock_201(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 	req.Header.Set("Content-Type", "application/json")
 
@@ -144,7 +138,6 @@ func Test_CreateMock_201(t *testing.T) {
 
 func Test_CreateMock_BadJson400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPost, "/management/mocks", bytes.NewBuffer([]byte("test")))
@@ -152,7 +145,7 @@ func Test_CreateMock_BadJson400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 	req.Header.Set("Content-Type", "application/json")
 
@@ -162,7 +155,6 @@ func Test_CreateMock_BadJson400(t *testing.T) {
 
 func Test_CreateMock_InvalidMock400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPost, "/management/mocks", bytes.NewBuffer([]byte("{}")))
@@ -170,7 +162,7 @@ func Test_CreateMock_InvalidMock400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 	req.Header.Set("Content-Type", "application/json")
 
@@ -180,7 +172,6 @@ func Test_CreateMock_InvalidMock400(t *testing.T) {
 
 func Test_CreateMock_RepoFailed400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPost, "/management/mocks", bytes.NewBuffer(testMockPingBytes))
@@ -188,7 +179,7 @@ func Test_CreateMock_RepoFailed400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 	req.Header.Set("Content-Type", "application/json")
 
@@ -200,7 +191,6 @@ func Test_CreateMock_RepoFailed400(t *testing.T) {
 
 func Test_DeleteMock_RepoFailed400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodDelete, "/management/mocks/test", http.NoBody)
@@ -208,7 +198,7 @@ func Test_DeleteMock_RepoFailed400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("DeleteMock", mock.Anything).Return(errors.New("test"))
@@ -219,7 +209,6 @@ func Test_DeleteMock_RepoFailed400(t *testing.T) {
 
 func Test_DeleteMock_OK(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodDelete, "/management/mocks/test", http.NoBody)
@@ -227,7 +216,7 @@ func Test_DeleteMock_OK(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("DeleteMock", mock.Anything).Return(nil)
@@ -238,7 +227,6 @@ func Test_DeleteMock_OK(t *testing.T) {
 
 func Test_UpdateMock_BadJson400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPut, "/management/mocks/test", bytes.NewBuffer([]byte("test")))
@@ -247,7 +235,7 @@ func Test_UpdateMock_BadJson400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	e.ServeHTTP(rec, req)
@@ -256,7 +244,6 @@ func Test_UpdateMock_BadJson400(t *testing.T) {
 
 func Test_UpdateMock_Invalid400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPut, "/management/mocks/test", bytes.NewBuffer([]byte("{}")))
@@ -265,7 +252,7 @@ func Test_UpdateMock_Invalid400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	e.ServeHTTP(rec, req)
@@ -274,7 +261,6 @@ func Test_UpdateMock_Invalid400(t *testing.T) {
 
 func Test_UpdateMock_DeleteFailed400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPut, "/management/mocks/test", bytes.NewBuffer(testMockPingBytes))
@@ -283,7 +269,7 @@ func Test_UpdateMock_DeleteFailed400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("UpdateMock", mock.Anything, mock.Anything).Return(errors.New("test"))
@@ -295,7 +281,6 @@ func Test_UpdateMock_DeleteFailed400(t *testing.T) {
 
 func Test_UpdateMock_AddFailed400(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPut, "/management/mocks/test", bytes.NewBuffer(testMockPingBytes))
@@ -304,7 +289,7 @@ func Test_UpdateMock_AddFailed400(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("UpdateMock", mock.Anything, mock.Anything).Return(errors.New("test"))
@@ -316,7 +301,6 @@ func Test_UpdateMock_AddFailed400(t *testing.T) {
 
 func Test_UpdateMock_OK(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodPut, "/management/mocks/test", bytes.NewBuffer(testMockPingBytes))
@@ -325,7 +309,7 @@ func Test_UpdateMock_OK(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("UpdateMock", mock.Anything, mock.Anything).Return(nil)
@@ -337,7 +321,6 @@ func Test_UpdateMock_OK(t *testing.T) {
 
 func Test_ExportMocks_RepoErr500(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodGet, "/management/mocks/actions/export", bytes.NewBuffer(testMockPingBytes))
@@ -345,7 +328,7 @@ func Test_ExportMocks_RepoErr500(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("GetMocks").Return([]*models.Mock{}, errors.New("test"))
@@ -357,7 +340,6 @@ func Test_ExportMocks_RepoErr500(t *testing.T) {
 
 func Test_ExportMocks_OK(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 
 	req := httptest.NewRequest(http.MethodGet, "/management/mocks/actions/export", bytes.NewBuffer(testMockPingBytes))
@@ -365,7 +347,7 @@ func Test_ExportMocks_OK(t *testing.T) {
 	rec := httptest.NewRecorder()
 	_ = e.NewContext(req, rec)
 
-	h := NewManagementHandler(e, services.NewMockService(repo), log)
+	h := NewManagementHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	repo.On("GetMocks").Return([]*models.Mock{}, nil)

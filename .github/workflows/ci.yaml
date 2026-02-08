@@ -20,18 +20,32 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: install frontend dependencies
+        run: npm ci
+
+      - name: check frontend types
+        run: npm run check:ui
+
+      - name: build frontend assets
+        run: npm run build:ui
+
       - name: test
         run: go test -v -timeout=120s -covermode=count -coverprofile=profile.cov ./...
-        env:
-          GOFLAGS: "-mod=vendor"
 
       - name: race test
-        run: go test -race -mod=vendor -timeout=120s -count=1 ./...
+        run: go test -race -timeout=120s -count=1 ./...
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.61.0
+          version: v1.64.8
+          install-mode: goinstall
           args: --config .golangci.yml
 
 

@@ -10,7 +10,6 @@ import (
 	"github.com/gonfff/mockster/app/repository"
 	"github.com/gonfff/mockster/app/services"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,7 +43,6 @@ var testMock = &models.Mock{
 
 func Test_MockHandler_any(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 	req := prepareQuery()
 	rec := httptest.NewRecorder()
@@ -52,7 +50,7 @@ func Test_MockHandler_any(t *testing.T) {
 
 	repo.On("GetMock", "test").Return(testMock, nil)
 	repo.On("GetMockNames", "POST /test").Return([]string{"test"}, nil)
-	h := NewMockHandler(e, services.NewMockService(repo), log)
+	h := NewMockHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 
 	e.ServeHTTP(rec, req)
@@ -75,7 +73,6 @@ func prepareQuery() *http.Request {
 
 func Test_MockHandler_nestedPath(t *testing.T) {
 	e := echo.New()
-	log := logrus.New()
 	repo := &repository.TestRepository{}
 	req := httptest.NewRequest(http.MethodPost, "/mock/v1/users/ping", bytes.NewReader([]byte("test")))
 	req.Header.Set("Content-Type", "application/text")
@@ -89,7 +86,7 @@ func Test_MockHandler_nestedPath(t *testing.T) {
 	repo.On("GetMock", "test").Return(testMock, nil)
 	repo.On("GetMockNames", "POST /v1/users/ping").Return([]string{"test"}, nil)
 
-	h := NewMockHandler(e, services.NewMockService(repo), log)
+	h := NewMockHandler(e, services.NewMockService(repo))
 	h.RegisterRoutes()
 	e.ServeHTTP(rec, req)
 

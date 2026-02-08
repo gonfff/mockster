@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/gonfff/mockster/app/api/handlers"
 	"github.com/gonfff/mockster/app/api/middlewares"
@@ -38,7 +37,7 @@ func NewApp() *App {
 	log := newLogger(cfg)
 
 	// initialize repository
-	repo, err := repository.InitRepository(cfg, log)
+	repo, err := repository.InitRepository()
 	if err != nil {
 		log.WithError(err).Fatal("Failed to initialize repository")
 	}
@@ -73,8 +72,8 @@ func (app *App) Setup() {
 
 	handlers.NewPingHandler(app.e).RegisterRoutes()
 	service := services.NewMockService(app.repo)
-	handlers.NewMockHandler(app.e, service, app.log).RegisterRoutes()
-	handlers.NewManagementHandler(app.e, service, app.log).RegisterRoutes()
+	handlers.NewMockHandler(app.e, service).RegisterRoutes()
+	handlers.NewManagementHandler(app.e, service).RegisterRoutes()
 
 	app.registerMiddlewares()
 	app.loadInitialMocks()
@@ -84,16 +83,6 @@ func (app *App) Setup() {
 func (app *App) registerMiddlewares() {
 	app.e.Use(middlewares.AccessLogMiddleware(app.log))
 	app.e.Use(middlewares.RecoverMiddleware(app.log))
-	if app.cfg.ManagementUser != "" && app.cfg.ManagementPass != "" {
-		app.e.Use(middleware.BasicAuthWithConfig(middleware.BasicAuthConfig{
-			Skipper: func(c echo.Context) bool {
-				return !strings.HasPrefix(c.Path(), "/management")
-			},
-			Validator: func(user string, password string, _ echo.Context) (bool, error) {
-				return user == app.cfg.ManagementUser && password == app.cfg.ManagementPass, nil
-			},
-		}))
-	}
 	app.e.Pre(middleware.RemoveTrailingSlash())
 	app.e.Use(middleware.Static(app.cfg.StaticPath))
 }

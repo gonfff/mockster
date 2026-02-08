@@ -52,22 +52,27 @@ func (s *MockService) MatchMock(method, path, body string, headers http.Header, 
 	return nil, matchErr
 }
 
+// GetMocks returns all configured mocks.
 func (s *MockService) GetMocks() ([]*models.Mock, error) {
 	return s.repo.GetMocks()
 }
 
+// CreateMock creates and stores a new mock.
 func (s *MockService) CreateMock(mock *models.Mock) error {
 	return s.repo.AddMock(mock)
 }
 
+// DeleteMock removes a mock by name.
 func (s *MockService) DeleteMock(name string) error {
 	return s.repo.DeleteMock(name)
 }
 
+// UpdateMock updates an existing mock identified by name.
 func (s *MockService) UpdateMock(name string, mock *models.Mock) error {
 	return s.repo.UpdateMock(name, mock)
 }
 
+// ReplaceAll replaces all stored mocks with provided ones.
 func (s *MockService) ReplaceAll(mocks []models.Mock) error {
 	items := make([]*models.Mock, 0, len(mocks))
 	for i := range mocks {

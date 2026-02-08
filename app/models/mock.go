@@ -12,8 +12,8 @@ type Mock struct {
 	Name     string   `yaml:"name" json:"name" validate:"required"`
 	Path     string   `yaml:"path" json:"path" validate:"required,validHTTPPath"`
 	Method   string   `yaml:"method" json:"method" validate:"required,oneof=GET POST PUT PATCH DELETE OPTIONS HEAD"`
-	Request  Request  `yaml:"request" json:"request" validate:"dive"`
-	Response Response `yaml:"response" json:"response" validate:"required,dive"`
+	Request  Request  `yaml:"request" json:"request"`
+	Response Response `yaml:"response" json:"response" validate:"required"`
 }
 
 // Request is the request for getting Response

@@ -8,19 +8,17 @@ import (
 	"github.com/gonfff/mockster/app/parsers"
 	"github.com/gonfff/mockster/app/services"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 )
 
 // ManagementHandler is the handler for the management API
 type ManagementHandler struct {
 	e       *echo.Echo
 	service *services.MockService
-	log     *logrus.Logger
 }
 
 // NewManagementHandler creates a new ManagementHandler
-func NewManagementHandler(e *echo.Echo, service *services.MockService, log *logrus.Logger) *ManagementHandler {
-	return &ManagementHandler{e: e, service: service, log: log}
+func NewManagementHandler(e *echo.Echo, service *services.MockService) *ManagementHandler {
+	return &ManagementHandler{e: e, service: service}
 }
 
 // RegisterRoutes registers the routes for the handler
@@ -127,11 +125,8 @@ func (h *ManagementHandler) ImportMocks(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to parse mocks"})
 	}
 
-	errs := make([]string, 0)
-
 	if err = h.service.ReplaceAll(mocks); err != nil {
-		errs = append(errs, err.Error())
-		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to import mocks", Details: errs})
+		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to import mocks", Details: err.Error()})
 	}
 	return c.JSON(http.StatusCreated, MessageSuccess)
 

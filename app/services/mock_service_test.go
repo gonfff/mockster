@@ -7,12 +7,11 @@ import (
 
 	"github.com/gonfff/mockster/app/models"
 	"github.com/gonfff/mockster/app/repository"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMatchMockMatchesSecondCandidate(t *testing.T) {
-	repo := repository.NewInMemoryRepository(logrus.New())
+	repo := repository.NewInMemoryRepository()
 	_ = repo.AddMock(&models.Mock{
 		Name:   "first",
 		Method: "POST",

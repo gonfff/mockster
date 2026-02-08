@@ -6,19 +6,17 @@ import (
 
 	"github.com/gonfff/mockster/app/services"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 )
 
 // MockHandler handles mock requests
 type MockHandler struct {
 	e       *echo.Echo
 	service *services.MockService
-	log     *logrus.Logger
 }
 
 // NewMockHandler creates new MockHandler
-func NewMockHandler(e *echo.Echo, service *services.MockService, log *logrus.Logger) *MockHandler {
-	return &MockHandler{e: e, service: service, log: log}
+func NewMockHandler(e *echo.Echo, service *services.MockService) *MockHandler {
+	return &MockHandler{e: e, service: service}
 }
 
 // RegisterRoutes registers routes for MockHandler
