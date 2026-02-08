@@ -28,17 +28,33 @@ namespace Mockster {
   }
 
   function generateTableHTML(data: Mock[]): string {
+    if (data.length === 0) {
+      return `
+        <tr>
+          <td colspan="6" class="empty-state-cell">
+            <div class="empty-state-box">
+              <p class="empty-state-title">No mocks found</p>
+              <p class="empty-state-subtitle">Try changing filters or create a new mock.</p>
+              <button type="button" class="btn btn-brand btn-sm" onclick="createModal()">Create first mock</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
     let tableHTML = "";
 
     data.forEach((item, index) => {
       const encodedName = encodeURIComponent(item.name);
+      const method = String(item.method || "").toUpperCase();
+      const methodClass = `method-badge method-${method.toLowerCase()}`;
       tableHTML += `
         <tr>
           <td class="align-middle">${index + 1}</td>
           <td class="text-primary align-middle">
             <span class="my-button" onClick="editModal(decodeURIComponent('${encodedName}'))">${escapeHtml(item.name)}</span>
           </td>
-          <td class="align-middle">${escapeHtml(item.method)}</td>
+          <td class="align-middle"><span class="${methodClass}">${escapeHtml(method)}</span></td>
           <td class="align-middle">${escapeHtml(item.path)}</td>
           <td class="align-middle">${escapeHtml(item.response?.status)}</td>
           <td class="align-middle">
@@ -61,14 +77,17 @@ namespace Mockster {
     const modalHTML = `
       <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-          <div class="modal-content">
+          <div class="modal-content modal-card">
             <div class="modal-header">
               <h1 class="modal-title fs-5" id="exampleModalLabel">Delete mock</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">Are you sure you want to delete ${safeName}?</div>
+            <div class="modal-body">
+              <p class="mb-1">Are you sure you want to delete <strong>${safeName}</strong>?</p>
+              <p class="text-muted small mb-0">This action cannot be undone.</p>
+            </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Close</button>
               <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onClick="deleteMock(decodeURIComponent('${encodedName}'))">Delete</button>
             </div>
           </div>
@@ -88,7 +107,8 @@ namespace Mockster {
   export function showToast(status: number | string, text: string): void {
     const safeText = escapeHtml(text);
     const isError = typeof status === "number" ? status >= 400 : String(status).toLowerCase().includes("error");
-    const toneClass = isError ? "text-bg-danger" : "text-bg-success";
+    const toneClass = isError ? "toast-danger" : "toast-success";
+    const icon = isError ? "!" : "OK";
 
     let stack = document.getElementById("toast-stack");
     if (!stack) {
@@ -105,19 +125,22 @@ namespace Mockster {
     }
 
     const toastEl = document.createElement("div");
-    toastEl.className = `toast ${toneClass} border-0`;
+    toastEl.className = `toast toast-shell ${toneClass} border-0`;
     toastEl.role = "alert";
     toastEl.ariaLive = "assertive";
     toastEl.ariaAtomic = "true";
     toastEl.innerHTML = `
-      <div class="d-flex align-items-center">
-        <div class="toast-body">${safeText}</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      <div class="d-flex align-items-start">
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-body">
+          <div class="toast-message">${safeText}</div>
+        </div>
+        <button type="button" class="btn-close ms-2 mt-2" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     `;
 
     stack.appendChild(toastEl);
-    const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+    const toast = new bootstrap.Toast(toastEl, { delay: 4200 });
     toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
     toast.show();
   }
@@ -130,33 +153,57 @@ namespace Mockster {
       : "saveCreateForm(event)";
 
     return `
-      <div class="modal" id="Editor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal fade" id="Editor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-right">
-          <div class="modal-content modal-content-right">
+          <div class="modal-content modal-content-right editor-shell">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">${textAction} Mock</h1>
+              <div>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">${textAction} Mock</h1>
+                <p class="text-muted small mb-0">Configure request matching and response output</p>
+              </div>
               <button type="button" class="btn-close" aria-label="Close" onclick="hideModal()"></button>
             </div>
-            <div class="modal-body" style="overflow-y: auto;">
+            <div class="modal-body editor-body">
               <form id="jsonForm">
-                <div class="mb-3"><label for="name" class="form-label">Name</label><input type="text" class="form-control" id="name" name="name" required></div>
-                <div class="mb-3"><label for="path" class="form-label">Path</label><input type="text" class="form-control" id="path" name="path" required></div>
-                <div class="mb-3">
-                  <label for="method" class="form-label">Method</label>
-                  <select class="form-select" id="method" name="method" required>
-                    <option value="GET">GET</option><option value="POST">POST</option><option value="PUT">PUT</option>
-                    <option value="PATCH">PATCH</option><option value="DELETE">DELETE</option><option value="OPTIONS">OPTIONS</option><option value="HEAD">HEAD</option>
-                  </select>
+                <section class="form-section">
+                  <h2 class="form-section-title">General</h2>
+                  <div class="row g-3">
+                    <div class="col-md-7"><label for="name" class="form-label">Name</label><input type="text" class="form-control" id="name" name="name" required></div>
+                    <div class="col-md-5">
+                      <label for="method" class="form-label">Method</label>
+                      <select class="form-select" id="method" name="method" required>
+                        <option value="GET">GET</option><option value="POST">POST</option><option value="PUT">PUT</option>
+                        <option value="PATCH">PATCH</option><option value="DELETE">DELETE</option><option value="OPTIONS">OPTIONS</option><option value="HEAD">HEAD</option>
+                      </select>
+                    </div>
+                    <div class="col-12"><label for="path" class="form-label">Path</label><input type="text" class="form-control" id="path" name="path" placeholder="/users/profile" required></div>
+                  </div>
+                </section>
+
+                <section class="form-section">
+                  <h2 class="form-section-title">Request Matchers</h2>
+                  <div class="mb-3"><label for="requestBody" class="form-label">Request Body</label><textarea class="form-control" id="requestBody" name="requestBody" rows="3"></textarea></div>
+                  <div class="row g-3">
+                    <div class="col-md-4"><label for="requestHeaders" class="form-label">Headers (JSON)</label><textarea class="form-control code-area" id="requestHeaders" name="requestHeaders" rows="4"></textarea></div>
+                    <div class="col-md-4"><label for="requestQueryParams" class="form-label">Query Params (JSON)</label><textarea class="form-control code-area" id="requestQueryParams" name="requestQueryParams" rows="4"></textarea></div>
+                    <div class="col-md-4"><label for="requestCookies" class="form-label">Cookies (JSON)</label><textarea class="form-control code-area" id="requestCookies" name="requestCookies" rows="4"></textarea></div>
+                  </div>
+                </section>
+
+                <section class="form-section">
+                  <h2 class="form-section-title">Response</h2>
+                  <div class="row g-3">
+                    <div class="col-md-4"><label for="responseStatus" class="form-label">Status</label><input type="number" class="form-control" id="responseStatus" name="responseStatus" min="100" max="599" required></div>
+                    <div class="col-md-4"><label for="responseHeaders" class="form-label">Headers (JSON)</label><textarea class="form-control code-area" id="responseHeaders" name="responseHeaders" rows="4"></textarea></div>
+                    <div class="col-md-4"><label for="responseCookies" class="form-label">Cookies (JSON)</label><textarea class="form-control code-area" id="responseCookies" name="responseCookies" rows="4"></textarea></div>
+                    <div class="col-12"><label for="responseBody" class="form-label">Body</label><textarea class="form-control" id="responseBody" name="responseBody" rows="4"></textarea></div>
+                  </div>
+                </section>
+
+                <div class="fixed-footer">
+                  <button type="button" class="btn btn-ghost" onclick="hideModal()">Cancel</button>
+                  <button type="submit" class="btn btn-brand" onclick="${saveFunc}">${textAction}</button>
                 </div>
-                <div class="mb-3"><label for="requestHeaders" class="form-label">Request Headers (JSON)</label><textarea class="form-control" id="requestHeaders" name="requestHeaders"></textarea></div>
-                <div class="mb-3"><label for="requestQueryParams" class="form-label">Request Query Params (JSON)</label><textarea class="form-control" id="requestQueryParams" name="requestQueryParams"></textarea></div>
-                <div class="mb-3"><label for="requestCookies" class="form-label">Request Cookies (JSON)</label><textarea class="form-control" id="requestCookies" name="requestCookies"></textarea></div>
-                <div class="mb-3"><label for="requestBody" class="form-label">Request Body</label><textarea class="form-control" id="requestBody" name="requestBody"></textarea></div>
-                <div class="mb-3"><label for="responseStatus" class="form-label">Response Status</label><input type="number" class="form-control" id="responseStatus" name="responseStatus" required></div>
-                <div class="mb-3"><label for="responseHeaders" class="form-label">Response Headers (JSON)</label><textarea class="form-control" id="responseHeaders" name="responseHeaders"></textarea></div>
-                <div class="mb-3"><label for="responseCookies" class="form-label">Response Cookies (JSON)</label><textarea class="form-control" id="responseCookies" name="responseCookies"></textarea></div>
-                <div class="mb-3"><label for="responseBody" class="form-label">Response Body</label><textarea class="form-control" id="responseBody" name="responseBody"></textarea></div>
-                <div class="fixed-footer"><button type="submit" class="btn btn-primary" onclick="${saveFunc}">${textAction}</button></div>
               </form>
             </div>
           </div>

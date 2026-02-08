@@ -10,6 +10,6 @@ interface Window {
   editModal: (name: string) => void;
   saveCreateForm: (e: Event) => Promise<void>;
   saveEditForm: (e: Event, name: string) => Promise<void>;
-  searchMocks: (e: Event) => void;
+  searchMocks: () => void;
   hideModal: () => void;
 }
