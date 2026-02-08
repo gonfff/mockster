@@ -13,6 +13,8 @@ type MockRepository interface {
 	AddMock(mock *models.Mock) error
 	DeleteMock(name string) error
 	DeleteAllMocks() error
+	UpdateMock(name string, mock *models.Mock) error
+	ReplaceAll(mocks []*models.Mock) error
 	ChangeName(oldName string, newName string) error
 	GetMockNames(endpoint string) ([]string, error)
 	// todo add methods for exporting and importing mocks from yaml

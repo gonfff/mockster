@@ -145,6 +145,61 @@ func (r *InMemoryRepository) DeleteAllMocks() error {
 	return nil
 }
 
+// UpdateMock updates an existing mock atomically.
+func (r *InMemoryRepository) UpdateMock(name string, mock *models.Mock) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	oldMock, ok := r.storage[name]
+	if !ok {
+		return fmt.Errorf("mock with name \"%s\" does not exist", name)
+	}
+
+	if mock.Name != name {
+		if _, exists := r.storage[mock.Name]; exists {
+			return fmt.Errorf("mock with name \"%s\" already exists", mock.Name)
+		}
+	}
+
+	r.deleteFromEndpoints(oldMock)
+	r.deleteFromOrder(name)
+	delete(r.storage, name)
+
+	r.storage[mock.Name] = mock
+	endpoint := fmt.Sprintf("%v %v", mock.Method, mock.Path)
+	r.endpointMocks[endpoint] = append(r.endpointMocks[endpoint], mock.Name)
+	r.order = append(r.order, mock.Name)
+	sort.Strings(r.order)
+
+	return nil
+}
+
+// ReplaceAll replaces repository data atomically.
+func (r *InMemoryRepository) ReplaceAll(mocks []*models.Mock) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	newStorage := make(map[string]*models.Mock, len(mocks))
+	newOrder := make([]string, 0, len(mocks))
+	newEndpointMocks := make(map[string][]string)
+
+	for _, mock := range mocks {
+		if _, exists := newStorage[mock.Name]; exists {
+			return fmt.Errorf("mock with name \"%s\" already exists", mock.Name)
+		}
+		newStorage[mock.Name] = mock
+		newOrder = append(newOrder, mock.Name)
+		endpoint := fmt.Sprintf("%v %v", mock.Method, mock.Path)
+		newEndpointMocks[endpoint] = append(newEndpointMocks[endpoint], mock.Name)
+	}
+
+	sort.Strings(newOrder)
+	r.storage = newStorage
+	r.order = newOrder
+	r.endpointMocks = newEndpointMocks
+	return nil
+}
+
 func (r *InMemoryRepository) deleteFromOrder(name string) {
 	for i, n := range r.order {
 		if n == name {

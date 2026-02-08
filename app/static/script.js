@@ -2,6 +2,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   await requestTable();
 });
 
+function escapeHtml(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 async function requestTable() {
   const tableBody = document.getElementById("table-body");
 
@@ -19,7 +31,7 @@ async function requestTable() {
       }
 
       localStorage.setItem("tableData", JSON.stringify(mapData));
-      ordering = localStorage.getItem("ordering");
+      const ordering = localStorage.getItem("ordering");
       if (ordering) {
         orderBy(ordering);
       } else {
@@ -46,12 +58,12 @@ function generateTableHTML(data) {
     tableHTML += `
             <tr>
                 <td class="align-middle">${i}</td>
-                <td class="text-primary align-middle"><span class="my-button" onClick="editModal('${item.name}')">${item.name}</span></td>
-                <td class="align-middle">${item.method}</td>
-                <td class="align-middle">${item.path}</td>
-                <td class="align-middle">${item.response.status}</td>
+                <td class="text-primary align-middle"><span class="my-button" onClick="editModal(decodeURIComponent('${encodeURIComponent(item.name)}'))">${escapeHtml(item.name)}</span></td>
+                <td class="align-middle">${escapeHtml(item.method)}</td>
+                <td class="align-middle">${escapeHtml(item.path)}</td>
+                <td class="align-middle">${escapeHtml(item.response.status)}</td>
                 <td class="align-middle">
-                    <button type="button" class="btn btn-outline-danger" onClick="deleteModal('${item.name}')">
+                    <button type="button" class="btn btn-outline-danger" onClick="deleteModal(decodeURIComponent('${encodeURIComponent(item.name)}'))">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
                             <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
                         </svg>
@@ -94,6 +106,8 @@ function orderBy(field) {
 }
 
 function deleteModal(name) {
+  const safeName = escapeHtml(name);
+  const encodedName = encodeURIComponent(name);
   const modalHTML = `
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -103,11 +117,11 @@ function deleteModal(name) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete ${name}?
+                    Are you sure you want to delete ${safeName}?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onClick="deleteMock('${name}')">Delete</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onClick="deleteMock(decodeURIComponent('${encodedName}'))">Delete</button>
                 </div>
             </div>
         </div>
@@ -120,16 +134,19 @@ function deleteModal(name) {
 }
 
 function toasts(title, status, text) {
+  const safeTitle = escapeHtml(title);
+  const safeStatus = escapeHtml(status);
+  const safeText = escapeHtml(text);
   const toastHTML = `
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
-                <strong class="me-auto">${title}</strong>
-                <small>${status}</small>
+                <strong class="me-auto">${safeTitle}</strong>
+                <small>${safeStatus}</small>
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
             <div class="toast-body">
-                ${text}
+                ${safeText}
             </div>
         </div>
     </div>`;
@@ -205,7 +222,7 @@ async function importYaml(e) {
 function editorForm(action, name = "") {
   const textAction = action === "edit" ? "Edit" : "Create";
   const saveFunc =
-    action === "edit" ? `saveEditForm('${name}')` : "saveCreateForm()";
+    action === "edit" ? `saveEditForm(event, '${name}')` : "saveCreateForm(event)";
 
   const editorFormHTML = `
     <div class="modal" id="Editor" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -299,15 +316,15 @@ function makeEditModal(mock) {
   document.getElementById("path").value = mock.path;
   document.getElementById("method").value = mock.method;
 
-  requestHeaders = JSON.stringify(mock.request.headers, null, 2);
+  const requestHeaders = JSON.stringify(mock.request.headers, null, 2);
   document.getElementById("requestHeaders").value =
     requestHeaders === "null" ? "" : requestHeaders;
 
-  requestQueryParams = JSON.stringify(mock.request.query_params, null, 2);
+  const requestQueryParams = JSON.stringify(mock.request.query_params, null, 2);
   document.getElementById("requestQueryParams").value =
     requestQueryParams === "null" ? "" : requestQueryParams;
 
-  requestCookies = JSON.stringify(mock.request.cookies, null, 2);
+  const requestCookies = JSON.stringify(mock.request.cookies, null, 2);
   document.getElementById("requestCookies").value =
     requestCookies === "null" ? "" : requestCookies;
 
@@ -315,11 +332,11 @@ function makeEditModal(mock) {
 
   document.getElementById("responseStatus").value = mock.response.status;
 
-  responseHeaders = JSON.stringify(mock.response.headers, null, 2);
+  const responseHeaders = JSON.stringify(mock.response.headers, null, 2);
   document.getElementById("responseHeaders").value =
     responseHeaders === "null" ? "" : responseHeaders;
 
-  responseCookies = JSON.stringify(mock.response.cookies, null, 2);
+  const responseCookies = JSON.stringify(mock.response.cookies, null, 2);
   document.getElementById("responseCookies").value =
     responseCookies === "null" ? "" : responseCookies;
 
@@ -365,8 +382,8 @@ function parseJSON(data) {
   }
 }
 
-async function saveCreateForm(name) {
-  event.preventDefault();
+async function saveCreateForm(e) {
+  e.preventDefault();
   const form = document.getElementById("jsonForm");
 
   let formData;
@@ -421,8 +438,8 @@ function editModal(name) {
   makeEditModal(item);
 }
 
-async function saveEditForm(name) {
-  event.preventDefault();
+async function saveEditForm(e, name) {
+  e.preventDefault();
   const form = document.getElementById("jsonForm");
 
   let formData;
@@ -471,8 +488,8 @@ async function saveEditForm(name) {
   }
 }
 
-function searchMocks() {
-  event.preventDefault();
+function searchMocks(e) {
+  e.preventDefault();
   const form = document.getElementById("search-form");
   const formData = new FormData(form);
   const query = formData.get("query");

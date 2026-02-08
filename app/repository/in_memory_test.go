@@ -221,3 +221,64 @@ func TestDeleteAllMocks(t *testing.T) {
 	assert.Equal(t, 0, len(r.order))
 	assert.Equal(t, 0, len(r.endpointMocks))
 }
+
+func TestUpdateMock(t *testing.T) {
+	r := mockNewInMemoryRepository()
+	oldMock := &models.Mock{Name: "old", Method: "GET", Path: "/one", Response: models.Response{Status: 200}}
+	err := r.AddMock(oldMock)
+	assert.NoError(t, err)
+
+	updated := &models.Mock{Name: "new", Method: "POST", Path: "/two", Response: models.Response{Status: 201}}
+	err = r.UpdateMock("old", updated)
+	assert.NoError(t, err)
+
+	_, err = r.GetMock("old")
+	assert.Error(t, err)
+	got, err := r.GetMock("new")
+	assert.NoError(t, err)
+	assert.Equal(t, "POST", got.Method)
+
+	names, err := r.GetMockNames("POST /two")
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"new"}, names)
+}
+
+func TestReplaceAll(t *testing.T) {
+	r := mockNewInMemoryRepository()
+
+	mocks := []*models.Mock{
+		{Name: "b", Method: "GET", Path: "/b", Response: models.Response{Status: 200}},
+		{Name: "a", Method: "POST", Path: "/a", Response: models.Response{Status: 201}},
+	}
+	err := r.ReplaceAll(mocks)
+	assert.NoError(t, err)
+
+	stored, err := r.GetMocks()
+	assert.NoError(t, err)
+	assert.Len(t, stored, 2)
+	assert.Equal(t, "a", stored[0].Name)
+	assert.Equal(t, "b", stored[1].Name)
+
+	err = r.ReplaceAll([]*models.Mock{{Name: "x"}, {Name: "x"}})
+	assert.Error(t, err)
+
+	stored, err = r.GetMocks()
+	assert.NoError(t, err)
+	assert.Len(t, stored, 2)
+}
+
+func TestUpdateMockAtomicOnConflict(t *testing.T) {
+	r := mockNewInMemoryRepository()
+	err := r.AddMock(&models.Mock{Name: "one", Method: "GET", Path: "/one", Response: models.Response{Status: 200}})
+	assert.NoError(t, err)
+	err = r.AddMock(&models.Mock{Name: "two", Method: "GET", Path: "/two", Response: models.Response{Status: 200}})
+	assert.NoError(t, err)
+
+	err = r.UpdateMock("one", &models.Mock{Name: "two", Method: "POST", Path: "/new", Response: models.Response{Status: 201}})
+	assert.Error(t, err)
+
+	_, err = r.GetMock("one")
+	assert.NoError(t, err)
+	_, err = r.GetMock("two")
+	assert.NoError(t, err)
+}

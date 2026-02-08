@@ -8,6 +8,7 @@ import (
 
 	"github.com/gonfff/mockster/app/models"
 	"github.com/gonfff/mockster/app/repository"
+	"github.com/gonfff/mockster/app/services"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -51,7 +52,7 @@ func Test_MockHandler_any(t *testing.T) {
 
 	repo.On("GetMock", "test").Return(testMock, nil)
 	repo.On("GetMockNames", "POST /test").Return([]string{"test"}, nil)
-	h := NewMockHandler(e, repo, log)
+	h := NewMockHandler(e, services.NewMockService(repo), log)
 	h.RegisterRoutes()
 
 	e.ServeHTTP(rec, req)
@@ -70,4 +71,28 @@ func prepareQuery() *http.Request {
 	q.Add("test", "test")
 	req.URL.RawQuery = q.Encode()
 	return req
+}
+
+func Test_MockHandler_nestedPath(t *testing.T) {
+	e := echo.New()
+	log := logrus.New()
+	repo := &repository.TestRepository{}
+	req := httptest.NewRequest(http.MethodPost, "/mock/v1/users/ping", bytes.NewReader([]byte("test")))
+	req.Header.Set("Content-Type", "application/text")
+	req.AddCookie(&http.Cookie{Name: "test", Value: "test"})
+	q := req.URL.Query()
+	q.Add("test", "test")
+	req.URL.RawQuery = q.Encode()
+	rec := httptest.NewRecorder()
+	_ = e.NewContext(req, rec)
+
+	repo.On("GetMock", "test").Return(testMock, nil)
+	repo.On("GetMockNames", "POST /v1/users/ping").Return([]string{"test"}, nil)
+
+	h := NewMockHandler(e, services.NewMockService(repo), log)
+	h.RegisterRoutes()
+	e.ServeHTTP(rec, req)
+
+	repo.AssertExpectations(t)
+	assert.Equal(t, http.StatusOK, rec.Code)
 }

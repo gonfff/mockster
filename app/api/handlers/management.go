@@ -6,21 +6,21 @@ import (
 
 	"github.com/gonfff/mockster/app/models"
 	"github.com/gonfff/mockster/app/parsers"
-	"github.com/gonfff/mockster/app/repository"
+	"github.com/gonfff/mockster/app/services"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 )
 
 // ManagementHandler is the handler for the management API
 type ManagementHandler struct {
-	e    *echo.Echo
-	repo repository.MockRepository
-	log  *logrus.Logger
+	e       *echo.Echo
+	service *services.MockService
+	log     *logrus.Logger
 }
 
 // NewManagementHandler creates a new ManagementHandler
-func NewManagementHandler(e *echo.Echo, repo repository.MockRepository, log *logrus.Logger) *ManagementHandler {
-	return &ManagementHandler{e: e, repo: repo, log: log}
+func NewManagementHandler(e *echo.Echo, service *services.MockService, log *logrus.Logger) *ManagementHandler {
+	return &ManagementHandler{e: e, service: service, log: log}
 }
 
 // RegisterRoutes registers the routes for the handler
@@ -36,7 +36,7 @@ func (h *ManagementHandler) RegisterRoutes() {
 
 // GetMocks returns all mocks
 func (h *ManagementHandler) GetMocks(c echo.Context) error {
-	mocks, err := h.repo.GetMocks()
+	mocks, err := h.service.GetMocks()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Message{Message: "Failed to get mocks", Details: err.Error()})
 	}
@@ -55,8 +55,8 @@ func (h *ManagementHandler) CreateMock(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Message{Message: "Invalid mock", Details: err.Error()})
 	}
 
-	if err := h.repo.AddMock(mock); err != nil {
-		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to add mock", Details: err.Error()})
+	if err := h.service.CreateMock(mock); err != nil {
+		return c.JSON(http.StatusConflict, Message{Message: "Failed to add mock", Details: err.Error()})
 	}
 	return c.JSON(http.StatusCreated, MessageSuccess)
 }
@@ -64,7 +64,7 @@ func (h *ManagementHandler) CreateMock(c echo.Context) error {
 // DeleteMock deletes a mock
 func (h *ManagementHandler) DeleteMock(c echo.Context) error {
 	name := c.Param("name")
-	if err := h.repo.DeleteMock(name); err != nil {
+	if err := h.service.DeleteMock(name); err != nil {
 		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to delete mock", Details: err.Error()})
 	}
 
@@ -83,20 +83,15 @@ func (h *ManagementHandler) UpdateMock(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, Message{Message: "Invalid mock", Details: err.Error()})
 	}
 
-	// todo add atomicity
-	if err := h.repo.DeleteMock(name); err != nil {
-		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to delete mock", Details: err.Error()})
-	}
-
-	if err := h.repo.AddMock(mock); err != nil {
-		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to add mock", Details: err.Error()})
+	if err := h.service.UpdateMock(name, mock); err != nil {
+		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to update mock", Details: err.Error()})
 	}
 	return c.JSON(http.StatusOK, MessageSuccess)
 }
 
 // ExportMocks exports all mocks to YAML
 func (h *ManagementHandler) ExportMocks(c echo.Context) error {
-	mocks, err := h.repo.GetMocks()
+	mocks, err := h.service.GetMocks()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Message{Message: "Failed to get mocks", Details: err.Error()})
 	}
@@ -134,20 +129,9 @@ func (h *ManagementHandler) ImportMocks(c echo.Context) error {
 
 	errs := make([]string, 0)
 
-	err = h.repo.DeleteAllMocks()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Message{Message: "Failed to delete mocks", Details: []string{err.Error()}})
-	}
-	for _, mock := range mocks {
-		// because address of range variable is reused
-		m := mock
-		err = h.repo.AddMock(&m)
-		if err != nil {
-			errs = append(errs, err.Error())
-		}
-	}
-	if len(errs) > 0 {
-		return c.JSON(http.StatusMultiStatus, Message{Message: "Partial failed to add mocks", Details: errs})
+	if err = h.service.ReplaceAll(mocks); err != nil {
+		errs = append(errs, err.Error())
+		return c.JSON(http.StatusBadRequest, Message{Message: "Failed to import mocks", Details: errs})
 	}
 	return c.JSON(http.StatusCreated, MessageSuccess)
 

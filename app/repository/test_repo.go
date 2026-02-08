@@ -40,6 +40,18 @@ func (m *TestRepository) DeleteAllMocks() error {
 	return args.Error(0)
 }
 
+// UpdateMock updates an existing mock.
+func (m *TestRepository) UpdateMock(name string, mock *models.Mock) error {
+	args := m.Called(name, mock)
+	return args.Error(0)
+}
+
+// ReplaceAll replaces all mocks.
+func (m *TestRepository) ReplaceAll(mocks []*models.Mock) error {
+	args := m.Called(mocks)
+	return args.Error(0)
+}
+
 // ChangeName changes the name of a mock
 func (m *TestRepository) ChangeName(oldName, newName string) error {
 	args := m.Called(oldName, newName)
