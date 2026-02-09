@@ -12,13 +12,19 @@ test-cover-html:
 	go tool cover -html=coverage.out
 
 race-test:
-	go test -race -mod=vendor -timeout=60s -count 1 ./...
+	go test -race -timeout=60s -count 1 ./...
 
 run:
 	go run app/main.go
 
 build-app:
 	go build -o ./mockster app/main.go
+
+build-ui:
+	npm run build:ui
+
+check-ui:
+	npm run check:ui
 
 build:
 	docker build -t $(tag) .

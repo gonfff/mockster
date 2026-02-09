@@ -10,6 +10,7 @@ import (
 	"github.com/gonfff/mockster/app/configs"
 	"github.com/gonfff/mockster/app/parsers"
 	"github.com/gonfff/mockster/app/repository"
+	"github.com/gonfff/mockster/app/services"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -36,7 +37,7 @@ func NewApp() *App {
 	log := newLogger(cfg)
 
 	// initialize repository
-	repo, err := repository.InitRepository(cfg, log)
+	repo, err := repository.InitRepository()
 	if err != nil {
 		log.WithError(err).Fatal("Failed to initialize repository")
 	}
@@ -70,8 +71,9 @@ func (app *App) Setup() {
 	app.e.HidePort = app.cfg.DisableGreetings
 
 	handlers.NewPingHandler(app.e).RegisterRoutes()
-	handlers.NewMockHandler(app.e, app.repo, app.log).RegisterRoutes()
-	handlers.NewManagementHandler(app.e, app.repo, app.log).RegisterRoutes()
+	service := services.NewMockService(app.repo)
+	handlers.NewMockHandler(app.e, service).RegisterRoutes()
+	handlers.NewManagementHandler(app.e, service).RegisterRoutes()
 
 	app.registerMiddlewares()
 	app.loadInitialMocks()
@@ -109,7 +111,7 @@ func (app *App) loadInitialMocks() {
 // Start starts the application
 func (app *App) Start() {
 	app.log.Info("Application started")
-	app.log.Info("Listening on port 8080")
+	app.log.Infof("Listening on port %v", app.cfg.Port)
 	err := app.e.Start(fmt.Sprintf(":%v", app.cfg.Port))
 	if err != nil && err != http.ErrServerClosed {
 		app.log.WithError(err).Fatal("Application failed")

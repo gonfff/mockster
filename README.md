@@ -20,13 +20,21 @@
 
 
 
-Mockster is a minimalistic, lightweight and simple mock server for testing your http clients. It can be embedded in your CI pipeline for tests or used as a standalone server while developing your application.
+Mockster is a minimalistic, lightweight and simple mock server for testing your HTTP clients. It can be embedded in your CI pipeline for tests or used as a standalone server while developing your application.
 
 ---
 ## Run app
 
 ```bash
 docker run -p 8080:8080 --rm ghcr.io/gonfff/mockster:<version>
+```
+
+For local development UI assets are generated from TypeScript:
+
+```bash
+npm ci
+npm run build:ui
+go run app/main.go
 ```
 
 ## Create mocks
@@ -37,7 +45,7 @@ docker run -p 8080:8080 --rm ghcr.io/gonfff/mockster:<version>
 
 ## Request mocks
 
-By sending a request to the `/mock/<your_path>` endpoint and providing all nessessary headers, body, cookies, query params.
+By sending a request to the `/mock/<your_path>` endpoint and providing all necessary headers, body, cookies, query params.
 
 ## UI
 Mockster has a simple UI for creating and managing mocks. It is available on the `/` endpoint.
@@ -48,10 +56,11 @@ Mockster has a simple UI for creating and managing mocks. It is available on the
 ## Environment variables
 - `MOCK_FILE_PATH` - path to YAML-file with mocks
 - `LOG_FORMATTER` - log formatter (text or json)
+- `LOG_LEVEL` - log level (panic, fatal, error, warn, info, debug, trace)
 - `PORT` - port on which the server will be running
 - `STATIC_PATH` - path to static files (UI)
 
 ---
 #### Additional info
-Thats my first Go, Bootstrap, JS project, so I will be glad to hear any feedback and suggestions.
+That's my first Go, Bootstrap, JS project, so I will be glad to hear any feedback and suggestions.
 Feel free to open issues and PRs.

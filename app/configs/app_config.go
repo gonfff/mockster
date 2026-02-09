@@ -13,9 +13,7 @@ type AppConfig struct {
 	MockFilePath     string `env:"MOCK_FILE_PATH"`
 	LogFormatter     string `env:"LOG_FORMATTER" envDefault:"text"`
 	LogLevel         string `env:"LOG_LEVEL" envDefault:"info"`
-	RecreateDB       bool   `env:"RECREATE_DB"`
 	Port             int    `env:"PORT" envDefault:"8080"`
-	StorageType      string `env:"STORAGE" envDefault:"in_memory"`
 	StaticPath       string `env:"STATIC_PATH" envDefault:"app/static"`
 
 	IntLogLevel logrus.Level
