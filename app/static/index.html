@@ -62,11 +62,11 @@
         </div>
         <div class="modal-body">
           <p class="text-muted small mb-3">This action replaces all existing mocks.</p>
-          <form id="fileInput">
+          <form id="fileInput" onsubmit="importYaml(event); return false;">
             <input type="file" class="form-control" name="file" accept=".yaml,.yml">
             <div class="modal-footer px-0 pb-0 mt-3">
               <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-brand" data-bs-dismiss="modal" onclick="importYaml(event)">Import</button>
+              <button type="submit" class="btn btn-brand" data-bs-dismiss="modal">Import</button>
             </div>
           </form>
         </div>
