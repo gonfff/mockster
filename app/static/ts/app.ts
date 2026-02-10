@@ -1,4 +1,12 @@
 namespace Mockster {
+  function resolveSuccessMessage(defaultMessage: string, message?: string): string {
+    const normalized = String(message || "").trim().toLowerCase();
+    if (!normalized || normalized === "ok" || normalized === "success") {
+      return defaultMessage;
+    }
+    return String(message);
+  }
+
   function formToMock(form: HTMLFormElement): Mock {
     const formData = new FormData(form);
     const field = (name: string): string => String(formData.get(name) || "");
@@ -77,7 +85,7 @@ namespace Mockster {
         body: formData,
       });
       form.reset();
-      showToast(response.status, payload?.message || "Import completed");
+      showToast(response.status, resolveSuccessMessage("Imported", payload?.message));
       await requestTable();
     } catch (error) {
       showToast("ERROR", (error as Error).message);
@@ -123,7 +131,7 @@ namespace Mockster {
         body: JSON.stringify(payload),
       });
       hideEditorModal();
-      showToast(response.status, data?.message || "Mock created");
+      showToast(response.status, resolveSuccessMessage("Created", data?.message));
       await requestTable();
     } catch (error) {
       showToast("ERROR", (error as Error).message);
@@ -152,32 +160,31 @@ namespace Mockster {
         body: JSON.stringify(payload),
       });
       hideEditorModal();
-      showToast(response.status, data?.message || "Mock updated");
+      showToast(response.status, resolveSuccessMessage("Updated", data?.message));
       await requestTable();
     } catch (error) {
       showToast("ERROR", (error as Error).message);
     }
   }
 
-  function searchMocks(e: Event): void {
-    e.preventDefault();
-    const form = document.getElementById("search-form") as HTMLFormElement | null;
-    if (!form) {
-      return;
-    }
+  function searchMocks(): void {
+		const input = document.getElementById("search-query") as HTMLInputElement | null;
+		if (!input) {
+			return;
+		}
 
-    const query = String(new FormData(form).get("query") || "").trim().toLowerCase();
-    if (!query) {
-      renderCurrent();
-      return;
-    }
+		const query = input.value.trim().toLowerCase();
+		if (!query) {
+			renderCurrent();
+			return;
+		}
 
-    const filtered = sortMocks(
-      getMocksList().filter((item) => String(item.name).toLowerCase().includes(query)),
-      state.ordering
-    );
-    renderTable(filtered);
-  }
+		const filtered = sortMocks(
+			getMocksList().filter((item) => String(item.name).toLowerCase().includes(query)),
+			state.ordering
+		);
+		renderTable(filtered);
+	}
 
   function exposeGlobals(): void {
     window.requestTable = requestTable;
