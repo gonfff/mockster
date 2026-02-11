@@ -107,8 +107,7 @@ namespace Mockster {
   export function showToast(status: number | string, text: string): void {
     const safeText = escapeHtml(text);
     const isError = typeof status === "number" ? status >= 400 : String(status).toLowerCase().includes("error");
-    const toneClass = isError ? "toast-danger" : "toast-success";
-    const icon = isError ? "!" : "OK";
+    const toneClass = isError ? "text-bg-danger" : "text-bg-success";
 
     let stack = document.getElementById("toast-stack");
     if (!stack) {
@@ -125,17 +124,16 @@ namespace Mockster {
     }
 
     const toastEl = document.createElement("div");
-    toastEl.className = `toast toast-shell ${toneClass} border-0`;
+    toastEl.className = `toast align-items-center ${toneClass} border-0`;
     toastEl.role = "alert";
     toastEl.ariaLive = "assertive";
     toastEl.ariaAtomic = "true";
     toastEl.innerHTML = `
-      <div class="d-flex align-items-start">
-        <div class="toast-icon">${icon}</div>
+      <div class="d-flex">
         <div class="toast-body">
-          <div class="toast-message">${safeText}</div>
+          ${safeText}
         </div>
-        <button type="button" class="btn-close ms-2 mt-2" data-bs-dismiss="toast" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     `;
 
@@ -200,11 +198,11 @@ namespace Mockster {
                   </div>
                 </section>
 
-                <div class="fixed-footer">
-                  <button type="button" class="btn btn-ghost" onclick="hideModal()">Cancel</button>
-                  <button type="submit" class="btn btn-brand" onclick="${saveFunc}">${textAction}</button>
-                </div>
               </form>
+            </div>
+            <div class="fixed-footer">
+              <button type="button" class="btn btn-ghost" onclick="hideModal()">Cancel</button>
+              <button type="submit" form="jsonForm" class="btn btn-brand" onclick="${saveFunc}">${textAction}</button>
             </div>
           </div>
         </div>
